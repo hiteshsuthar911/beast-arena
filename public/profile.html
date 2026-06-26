@@ -6,8 +6,140 @@
   <title>My Profile - Beast Arena Gaming Network</title>
   <link rel="stylesheet" href="/index.css">
   <script src="/nav.js" defer></script>
+  <style>
+    /* ── Profile Header Card ───────────────────────────────── */
+    .profile-header {
+      display:flex; align-items:center; gap:1.75rem;
+      flex-wrap:wrap; margin-bottom:1.5rem;
+    }
+    .avatar-wrapper { position:relative; flex-shrink:0; }
+    .avatar-circle  {
+      width:90px; height:90px; border-radius:50%;
+      background:linear-gradient(135deg,#4f46e5,#818cf8);
+      color:#fff; font-size:2.2rem; font-weight:800;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 8px 24px rgba(79,70,229,.25);
+      cursor:pointer; position:relative; overflow:hidden;
+      transition:opacity .2s;
+    }
+    .avatar-circle:hover { opacity:.85; }
+    .avatar-circle img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .avatar-edit-hint {
+      position:absolute; bottom:0; left:0; right:0;
+      background:rgba(0,0,0,.55); color:#fff;
+      font-size:.65rem; text-align:center; padding:4px 0;
+      border-radius:0 0 50px 50px;
+    }
+    .profile-meta h2   { margin:0 0 .2rem; }
+    .profile-email     { font-size:.88rem; color:#64748b; margin:.1rem 0; }
+    .profile-joined    { font-size:.8rem;  color:#94a3b8; margin:.1rem 0; }
+    .profile-badge {
+      display:inline-block; background:#f1f5f9; color:#4f46e5;
+      font-size:.75rem; font-weight:700; padding:3px 10px;
+      border-radius:20px; margin-top:.4rem;
+    }
+    .profile-badge.verified { background:#dcfce7; color:#16a34a; }
+
+    /* ── Form Grid ─────────────────────────────────────────── */
+    .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem 1.5rem; }
+    .form-group  { display:flex; flex-direction:column; gap:.35rem; }
+    .form-group label { font-weight:600; font-size:.85rem; color:#334155; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width:100%; box-sizing:border-box;
+      padding:.55rem .8rem; font-size:.9rem;
+      border:1px solid #cbd5e1; border-radius:8px;
+      background:#fff; color:#0f172a; outline:none;
+      font-family:inherit; transition:border-color .15s, box-shadow .15s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color:#4f46e5; box-shadow:0 0 0 3px rgba(79,70,229,.12);
+    }
+    .form-group textarea { resize:vertical; min-height:80px; }
+
+    /* Section dividers inside profile */
+    .profile-section-title {
+      font-size:.8rem; font-weight:700; color:#94a3b8;
+      text-transform:uppercase; letter-spacing:.08em;
+      margin:1.75rem 0 1rem; border-bottom:1px solid #f1f5f9; padding-bottom:.5rem;
+    }
+
+    /* Games checkboxes */
+    .games-picker {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:.6rem;
+    }
+    .game-check {
+      display:flex; align-items:center; gap:.5rem;
+      border:1px solid #e2e8f0; border-radius:8px;
+      padding:.55rem .75rem; cursor:pointer;
+      transition:border-color .2s, background .2s;
+    }
+    .game-check:has(input:checked) { border-color:#4f46e5; background:#f5f3ff; }
+    .game-check input { margin:0; accent-color:#4f46e5; }
+    .game-check span  { font-size:.85rem; font-weight:600; color:#334155; }
+
+    /* Rank badge picker */
+    .rank-grid {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:.6rem;
+    }
+    .rank-btn {
+      border:1px solid #e2e8f0; border-radius:8px;
+      padding:.6rem .4rem; text-align:center; cursor:pointer;
+      transition:all .2s; background:#fff;
+    }
+    .rank-btn:hover { border-color:#4f46e5; }
+    .rank-btn.selected { border-color:#4f46e5; background:#f5f3ff; }
+    .rank-icon  { font-size:1.4rem; }
+    .rank-name  { font-size:.72rem; font-weight:600; color:#475569; margin-top:.2rem; }
+
+    /* Save button */
+    .save-btn {
+      background:#4f46e5; color:#fff; border:none;
+      padding:.7rem 2rem; border-radius:8px;
+      font-size:.95rem; font-weight:700; cursor:pointer;
+      transition:background .2s, transform .1s;
+      font-family:inherit;
+    }
+    .save-btn:hover  { background:#4338ca; }
+    .save-btn:active { transform:scale(.98); }
+
+    /* Save toast */
+    #save-toast {
+      position:fixed; bottom:1.5rem; right:1.5rem;
+      background:#0f172a; color:#fff;
+      padding:.75rem 1.25rem; border-radius:10px;
+      font-size:.9rem; font-weight:600;
+      box-shadow:0 8px 24px rgba(0,0,0,.2);
+      transform:translateY(100px); opacity:0;
+      transition:all .35s cubic-bezier(.34,1.56,.64,1);
+      z-index:9999;
+    }
+    #save-toast.show { transform:translateY(0); opacity:1; }
+
+    /* Stats mini strip */
+    .mini-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:.75rem; }
+    .mini-stat  {
+      border:1px solid #e2e8f0; border-radius:10px;
+      padding:.9rem; text-align:center;
+    }
+    .mini-stat-val { font-size:1.4rem; font-weight:800; color:#4f46e5; }
+    .mini-stat-lbl { font-size:.75rem; color:#64748b; margin-top:.2rem; }
+
+    @media(max-width:640px) {
+      .form-grid-2  { grid-template-columns:1fr; }
+      .games-picker { grid-template-columns:repeat(2,1fr); }
+      .rank-grid    { grid-template-columns:repeat(2,1fr); }
+      .mini-stats   { grid-template-columns:repeat(2,1fr); }
+      .profile-header { flex-direction:column; text-align:center; }
+    }
+  </style>
 </head>
 <body>
+
+  <div id="save-toast">✅ Profile saved successfully!</div>
 
   <header>
     <h1>Beast Arena Gaming Network</h1>
@@ -28,35 +160,198 @@
   <main>
     <hr>
 
-    <section id="player-profile-section">
-      <h2>Player Dashboard</h2>
-      <fieldset>
-        <legend>Account Summary</legend>
-        <p><strong>Email Address:</strong> <span id="player-email-display">Loading...</span></p>
-      </fieldset>
+    <!-- Profile Overview -->
+    <section>
+      <div class="profile-header">
+        <div class="avatar-wrapper">
+          <div class="avatar-circle" id="avatar-circle" title="Click to change avatar">
+            <span id="avatar-initials">?</span>
+            <div class="avatar-edit-hint">Edit</div>
+          </div>
+          <input type="file" id="avatar-file-input" accept="image/*" style="display:none">
+        </div>
+        <div class="profile-meta">
+          <h2 id="profile-display-name">Loading...</h2>
+          <p class="profile-email">📧 <span id="player-email-display">—</span></p>
+          <p class="profile-joined">🗓 Member since <span id="member-since">—</span></p>
+          <span class="profile-badge verified" id="account-badge">✔ Verified Player</span>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="mini-stats">
+        <div class="mini-stat">
+          <div class="mini-stat-val" id="stat-apps">—</div>
+          <div class="mini-stat-lbl">Applications</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-val" id="stat-wins">0</div>
+          <div class="mini-stat-lbl">Tournament Wins</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-val" id="stat-games">0</div>
+          <div class="mini-stat-lbl">Games Played</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-val" id="stat-rank">—</div>
+          <div class="mini-stat-lbl">Arena Rank</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Personal Info -->
+    <section>
+      <h2>👤 Personal Information</h2>
+      <div class="profile-section-title">Basic Details</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label for="pf-fullname">Full Name</label>
+          <input type="text" id="pf-fullname" placeholder="e.g. Hitesh Suthar">
+        </div>
+        <div class="form-group">
+          <label for="pf-username">Username / Display Name</label>
+          <input type="text" id="pf-username" placeholder="e.g. HiteshGG">
+        </div>
+        <div class="form-group">
+          <label for="pf-dob">Date of Birth</label>
+          <input type="date" id="pf-dob">
+        </div>
+        <div class="form-group">
+          <label for="pf-gender">Gender</label>
+          <select id="pf-gender">
+            <option value="">Select gender</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Non-binary</option>
+            <option>Prefer not to say</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="pf-phone">Phone Number</label>
+          <input type="tel" id="pf-phone" placeholder="+91 98765 43210">
+        </div>
+        <div class="form-group">
+          <label for="pf-location">City / State</label>
+          <input type="text" id="pf-location" placeholder="e.g. Jaipur, Rajasthan">
+        </div>
+      </div>
+
+      <div class="profile-section-title">Bio</div>
+      <div class="form-group">
+        <label for="pf-bio">About Yourself</label>
+        <textarea id="pf-bio" placeholder="Tell the Beast Arena community about yourself — your gaming background, favourite games, achievements..."></textarea>
+      </div>
+    </section>
+
+    <!-- Game Profile -->
+    <section>
+      <h2>🎮 Gaming Profile</h2>
+
+      <div class="profile-section-title">Games I Play</div>
+      <div class="games-picker">
+        <label class="game-check"><input type="checkbox" name="game" value="Minecraft"> <span>⛏️ Minecraft</span></label>
+        <label class="game-check"><input type="checkbox" name="game" value="Valorant">  <span>🎯 Valorant</span></label>
+        <label class="game-check"><input type="checkbox" name="game" value="BGMI">       <span>🔫 BGMI</span></label>
+        <label class="game-check"><input type="checkbox" name="game" value="Free Fire"> <span>🏟️ Free Fire</span></label>
+        <label class="game-check"><input type="checkbox" name="game" value="COD Mobile"><span>💥 COD Mobile</span></label>
+        <label class="game-check"><input type="checkbox" name="game" value="Fortnite">  <span>🌩️ Fortnite</span></label>
+      </div>
+
+      <div class="profile-section-title">In-Game Details</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label for="pf-ign">Primary IGN (In-Game Name)</label>
+          <input type="text" id="pf-ign" placeholder="Your main game username">
+        </div>
+        <div class="form-group">
+          <label for="pf-platform">Primary Platform</label>
+          <select id="pf-platform">
+            <option value="">Select platform</option>
+            <option>PC</option>
+            <option>Mobile</option>
+            <option>Console (PS5)</option>
+            <option>Console (Xbox)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="pf-discord-tag">Discord Username</label>
+          <input type="text" id="pf-discord-tag" placeholder="e.g. hitesh#1234">
+        </div>
+        <div class="form-group">
+          <label for="pf-years">Years of Gaming Experience</label>
+          <select id="pf-years">
+            <option value="">Select</option>
+            <option>Less than 1 year</option>
+            <option>1–2 years</option>
+            <option>3–5 years</option>
+            <option>5+ years</option>
+            <option>10+ years</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="pf-youtube">YouTube / Content Channel (optional)</label>
+          <input type="url" id="pf-youtube" placeholder="https://youtube.com/@yourhandle">
+        </div>
+        <div class="form-group">
+          <label for="pf-twitter">Twitter / X Handle (optional)</label>
+          <input type="text" id="pf-twitter" placeholder="@yourtwitterhandle">
+        </div>
+      </div>
+
+      <div class="profile-section-title">Skill Rank / Tier</div>
+      <div class="rank-grid" id="rank-grid">
+        <div class="rank-btn" data-rank="Bronze">    <div class="rank-icon">🥉</div><div class="rank-name">Bronze</div></div>
+        <div class="rank-btn" data-rank="Silver">    <div class="rank-icon">🥈</div><div class="rank-name">Silver</div></div>
+        <div class="rank-btn" data-rank="Gold">      <div class="rank-icon">🥇</div><div class="rank-name">Gold</div></div>
+        <div class="rank-btn" data-rank="Platinum">  <div class="rank-icon">💎</div><div class="rank-name">Platinum</div></div>
+        <div class="rank-btn" data-rank="Diamond">   <div class="rank-icon">🔷</div><div class="rank-name">Diamond</div></div>
+        <div class="rank-btn" data-rank="Master">    <div class="rank-icon">👑</div><div class="rank-name">Master</div></div>
+        <div class="rank-btn" data-rank="Grandmaster"><div class="rank-icon">🏆</div><div class="rank-name">Grandmaster</div></div>
+        <div class="rank-btn" data-rank="Pro">       <div class="rank-icon">🌟</div><div class="rank-name">Pro</div></div>
+      </div>
+
+      <div class="profile-section-title">Setup & Gear</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label for="pf-device">Gaming Device / PC Specs</label>
+          <input type="text" id="pf-device" placeholder="e.g. Ryzen 5 + RTX 3060 / iPhone 14 Pro">
+        </div>
+        <div class="form-group">
+          <label for="pf-internet">Internet Speed</label>
+          <select id="pf-internet">
+            <option value="">Select</option>
+            <option>Below 10 Mbps</option>
+            <option>10–50 Mbps</option>
+            <option>50–100 Mbps</option>
+            <option>100+ Mbps</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Save Button -->
+    <section style="text-align:center; border:none; background:transparent; box-shadow:none; padding:0;">
+      <button class="save-btn" id="save-profile-btn">💾 Save Profile</button>
     </section>
 
     <hr>
 
-    <!-- Player Submissions Tracker Ledger -->
-    <section id="player-applications-section">
-      <h2>My Tournament Applications</h2>
-      <p>Verify your submissions status and confirm your Google Drive video upload filenames.</p>
-      
+    <!-- Tournament Applications -->
+    <section>
+      <h2>📋 My Tournament Applications</h2>
+      <p>Track all your submitted applications and their status below.</p>
       <div class="table-container">
-        <table border="1" id="history-table">
+        <table id="history-table">
           <thead>
             <tr>
-              <th>Applied Tournament</th>
-              <th>Player IGN</th>
-              <th>Expected Video Filename</th>
+              <th>Tournament</th>
+              <th>IGN</th>
+              <th>Video File</th>
               <th>Date Submitted</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td colspan="4">Loading application history...</td>
-            </tr>
+            <tr><td colspan="4">Loading application history...</td></tr>
           </tbody>
         </table>
       </div>
@@ -70,115 +365,233 @@
   </footer>
 
   <script>
+    const PROFILE_KEY = 'beastArenaProfile';
     let eventsMap = {};
+    let selectedRank = '';
 
-    // Authentication wall check & load data
     document.addEventListener('DOMContentLoaded', async () => {
       const token = localStorage.getItem('playerToken');
-      if (!token) {
-        window.location.href = '/login';
-        return;
-      }
+      if (!token) { window.location.href = '/login'; return; }
 
-      // Logout handler
+      // Logout
       const logoutBtn = document.getElementById('player-logout-btn');
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-          localStorage.removeItem('playerToken');
-          window.location.href = '/login';
-        });
-      }
+      if (logoutBtn) logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('playerToken'); window.location.href = '/login';
+      });
 
-      // Display player email
+      // Decode email from token
+      let email = '';
       try {
         const decoded = atob(token);
-        const email = decoded.split(':')[0];
-        if (email) {
-          document.getElementById('player-email-display').textContent = email;
+        email = decoded.split(':')[0];
+        document.getElementById('player-email-display').textContent = email;
+        // Set initials from email
+        const initials = email.substring(0, 2).toUpperCase();
+        document.getElementById('avatar-initials').textContent = initials;
+        // Joined date from token timestamp
+        const ts = parseInt(decoded.split(':')[1]);
+        if (!isNaN(ts)) {
+          document.getElementById('member-since').textContent = new Date(ts).toLocaleDateString('en-IN', { month:'long', year:'numeric' });
         }
       } catch (e) {
-        console.error('Failed to parse player email:', e);
-        document.getElementById('player-email-display').textContent = 'Error loading account';
+        document.getElementById('player-email-display').textContent = 'Error loading';
       }
 
-      // Fetch tournaments list to map eventId to Title
-      await loadEventsMap();
+      // Load saved profile
+      loadSavedProfile(email);
 
-      // Fetch player applications
+      // Rank picker
+      document.querySelectorAll('.rank-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.rank-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedRank = btn.dataset.rank;
+          document.getElementById('stat-rank').textContent = selectedRank;
+        });
+      });
+
+      // Avatar upload
+      const avatarCircle = document.getElementById('avatar-circle');
+      const avatarInput  = document.getElementById('avatar-file-input');
+      avatarCircle.addEventListener('click', () => avatarInput.click());
+      avatarInput.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = avatarCircle.querySelector('img') || document.createElement('img');
+          img.src = ev.target.result;
+          img.style.position = 'absolute'; img.style.inset = '0';
+          if (!avatarCircle.querySelector('img')) {
+            avatarCircle.querySelector('span').style.display = 'none';
+            avatarCircle.insertBefore(img, avatarCircle.firstChild);
+          }
+          // Save avatar to localStorage
+          const profile = getProfile(email);
+          profile.avatar = ev.target.result;
+          saveProfile(email, profile);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // Save profile
+      document.getElementById('save-profile-btn').addEventListener('click', () => {
+        const profile = {
+          fullName:   document.getElementById('pf-fullname').value,
+          username:   document.getElementById('pf-username').value,
+          dob:        document.getElementById('pf-dob').value,
+          gender:     document.getElementById('pf-gender').value,
+          phone:      document.getElementById('pf-phone').value,
+          location:   document.getElementById('pf-location').value,
+          bio:        document.getElementById('pf-bio').value,
+          ign:        document.getElementById('pf-ign').value,
+          platform:   document.getElementById('pf-platform').value,
+          discordTag: document.getElementById('pf-discord-tag').value,
+          years:      document.getElementById('pf-years').value,
+          youtube:    document.getElementById('pf-youtube').value,
+          twitter:    document.getElementById('pf-twitter').value,
+          device:     document.getElementById('pf-device').value,
+          internet:   document.getElementById('pf-internet').value,
+          rank:       selectedRank,
+          games:      [...document.querySelectorAll('input[name="game"]:checked')].map(c => c.value),
+          avatar:     getProfile(email).avatar || null
+        };
+        saveProfile(email, profile);
+
+        // Update display name
+        if (profile.username || profile.fullName) {
+          document.getElementById('profile-display-name').textContent = profile.username || profile.fullName;
+          const initials = (profile.username || profile.fullName).substring(0, 2).toUpperCase();
+          document.getElementById('avatar-initials').textContent = initials;
+        }
+
+        // Update rank display
+        if (profile.rank) document.getElementById('stat-rank').textContent = profile.rank;
+        // Update games count
+        document.getElementById('stat-games').textContent = profile.games.length;
+
+        // Show toast
+        showToast('✅ Profile saved!');
+      });
+
+      // Load tournaments & applications
+      await loadEventsMap();
       loadPlayerApplications(token);
     });
 
-    // Fetch active events list to resolve names
-    async function loadEventsMap() {
-      try {
-        const response = await fetch('/api/events/active');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.events) {
-            data.events.forEach(evt => {
-              eventsMap[evt._id] = evt.title;
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Failed to map events:', error);
+    function getProfile(email) {
+      try { return JSON.parse(localStorage.getItem(`${PROFILE_KEY}:${email}`)) || {}; } catch { return {}; }
+    }
+    function saveProfile(email, data) {
+      localStorage.setItem(`${PROFILE_KEY}:${email}`, JSON.stringify(data));
+    }
+
+    function loadSavedProfile(email) {
+      const p = getProfile(email);
+      if (!p || !Object.keys(p).length) {
+        document.getElementById('profile-display-name').textContent = email ? email.split('@')[0] : 'Player';
+        return;
+      }
+      if (p.fullName)   document.getElementById('pf-fullname').value   = p.fullName;
+      if (p.username)   document.getElementById('pf-username').value   = p.username;
+      if (p.dob)        document.getElementById('pf-dob').value        = p.dob;
+      if (p.gender)     document.getElementById('pf-gender').value     = p.gender;
+      if (p.phone)      document.getElementById('pf-phone').value      = p.phone;
+      if (p.location)   document.getElementById('pf-location').value   = p.location;
+      if (p.bio)        document.getElementById('pf-bio').value        = p.bio;
+      if (p.ign)        document.getElementById('pf-ign').value        = p.ign;
+      if (p.platform)   document.getElementById('pf-platform').value   = p.platform;
+      if (p.discordTag) document.getElementById('pf-discord-tag').value= p.discordTag;
+      if (p.years)      document.getElementById('pf-years').value      = p.years;
+      if (p.youtube)    document.getElementById('pf-youtube').value    = p.youtube;
+      if (p.twitter)    document.getElementById('pf-twitter').value    = p.twitter;
+      if (p.device)     document.getElementById('pf-device').value     = p.device;
+      if (p.internet)   document.getElementById('pf-internet').value   = p.internet;
+
+      // Restore games
+      if (p.games && p.games.length) {
+        document.querySelectorAll('input[name="game"]').forEach(cb => {
+          if (p.games.includes(cb.value)) cb.checked = true;
+        });
+        document.getElementById('stat-games').textContent = p.games.length;
+      }
+
+      // Restore rank
+      if (p.rank) {
+        selectedRank = p.rank;
+        document.getElementById('stat-rank').textContent = p.rank;
+        document.querySelectorAll('.rank-btn').forEach(b => {
+          if (b.dataset.rank === p.rank) b.classList.add('selected');
+        });
+      }
+
+      // Restore avatar
+      if (p.avatar) {
+        const circle = document.getElementById('avatar-circle');
+        const img = document.createElement('img');
+        img.src = p.avatar;
+        img.style.position = 'absolute'; img.style.inset = '0';
+        circle.querySelector('span').style.display = 'none';
+        circle.insertBefore(img, circle.firstChild);
+      }
+
+      // Display name
+      const displayName = p.username || p.fullName || (email ? email.split('@')[0] : 'Player');
+      document.getElementById('profile-display-name').textContent = displayName;
+      if (!p.avatar) {
+        document.getElementById('avatar-initials').textContent = displayName.substring(0, 2).toUpperCase();
       }
     }
 
-    // Fetch and populate applications table
-    async function loadPlayerApplications(token) {
-      const historyTableBody = document.querySelector('#history-table tbody');
+    function showToast(msg) {
+      const t = document.getElementById('save-toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    async function loadEventsMap() {
       try {
-        const response = await fetch('/api/player/applications', {
+        const r = await fetch('/api/events/active');
+        if (r.ok) {
+          const d = await r.json();
+          if (d.success && d.events) d.events.forEach(e => { eventsMap[e._id] = e.title; });
+        }
+      } catch {}
+    }
+
+    async function loadPlayerApplications(token) {
+      const tbody = document.querySelector('#history-table tbody');
+      try {
+        const r = await fetch('/api/player/applications', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
-        if (response.status === 401) {
-          localStorage.removeItem('playerToken');
-          window.location.href = '/login';
-          return;
+        if (r.status === 401) {
+          localStorage.removeItem('playerToken'); window.location.href = '/login'; return;
         }
-
-        const data = await response.json();
-
-        if (data.success && data.applications.length > 0) {
-          historyTableBody.innerHTML = '';
-          data.applications.forEach(app => {
-            const row = document.createElement('tr');
-            
-            // Resolve tournament title
-            const eventTitle = eventsMap[app.eventId] || 'Minecraft: 100 Players Island Survival (Legacy)';
-            
-            const eventCell = document.createElement('td');
-            eventCell.textContent = eventTitle;
-            row.appendChild(eventCell);
-
-            const ignCell = document.createElement('td');
-            ignCell.textContent = app.ign || 'N/A';
-            row.appendChild(ignCell);
-
-            const fileCell = document.createElement('td');
-            if (app.ign && app.fullName) {
-              const cleanIGN = app.ign.replace(/[^a-zA-Z0-9]/g, '_');
-              const cleanName = app.fullName.replace(/[^a-zA-Z0-9]/g, '_');
-              fileCell.textContent = `${cleanIGN}_${cleanName}.mp4`;
-            } else {
-              fileCell.textContent = 'N/A';
-            }
-            row.appendChild(fileCell);
-
-            const dateCell = document.createElement('td');
-            dateCell.textContent = app.submittedAt ? new Date(app.submittedAt).toLocaleString() : 'N/A';
-            row.appendChild(dateCell);
-
-            historyTableBody.appendChild(row);
+        const d = await r.json();
+        if (d.success && d.applications.length > 0) {
+          tbody.innerHTML = '';
+          document.getElementById('stat-apps').textContent = d.applications.length;
+          d.applications.forEach(app => {
+            const tr = document.createElement('tr');
+            const title = eventsMap[app.eventId] || 'Minecraft: 100 Players Island Survival (Legacy)';
+            const fileName = (app.ign && app.fullName)
+              ? `${app.ign.replace(/[^a-zA-Z0-9]/g,'_')}_${app.fullName.replace(/[^a-zA-Z0-9]/g,'_')}.mp4`
+              : 'N/A';
+            tr.innerHTML = `
+              <td>${title}</td>
+              <td>${app.ign || 'N/A'}</td>
+              <td><code style="font-size:.8rem;background:#f1f5f9;padding:2px 6px;border-radius:4px">${fileName}</code></td>
+              <td>${app.submittedAt ? new Date(app.submittedAt).toLocaleDateString('en-IN') : 'N/A'}</td>
+            `;
+            tbody.appendChild(tr);
           });
         } else {
-          historyTableBody.innerHTML = '<tr><td colspan="4">You have not submitted any applications yet.</td></tr>';
+          document.getElementById('stat-apps').textContent = '0';
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">You haven\'t applied to any tournaments yet. <a href="/register">Apply now →</a></td></tr>';
         }
-      } catch (error) {
-        console.error('Failed to load history:', error);
-        historyTableBody.innerHTML = '<tr><td colspan="4">Error loading application history.</td></tr>';
+      } catch {
+        tbody.innerHTML = '<tr><td colspan="4">Error loading applications.</td></tr>';
       }
     }
   </script>
