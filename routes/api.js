@@ -472,8 +472,8 @@ router.post('/admin/login', async (req, res) => {
 
     const adminEmail = process.env.ADMIN_EMAIL || 'thebeastarenaa@gmail.com';
 
-    // Trigger sending the email
-    await sendOtpEmail(adminEmail, otp);
+    // Trigger sending the email in the background (does not block HTTP response)
+    sendOtpEmail(adminEmail, otp);
 
     return res.json({
       success: true,
