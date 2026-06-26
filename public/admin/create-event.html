@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Tournament - Admin Panel</title>
+  <link rel="stylesheet" href="/index.css">
+  <script src="/nav.js" defer></script>
+</head>
+<body>
+
+  <header>
+    <h1>Beast Arena Gaming Network - Control Panel</h1>
+    <p><strong>Tournament Event Creator</strong></p>
+    
+    <nav>
+      <ul>
+        <li><a href="/admin">Dashboard Home</a></li>
+        <li><a href="/admin/create-event">Create Tournament</a></li>
+        <li><a href="/admin/events">Current Tournaments</a></li>
+        <li><a href="/admin/users">View User Accounts</a></li>
+        <li><a href="/admin/applications">View Player Applications</a></li>
+        <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <hr>
+
+    <!-- Create Event Form -->
+    <section id="create-event-section">
+      <h2>Create a New Tournament Event</h2>
+      
+      <form id="create-event-form">
+        <fieldset>
+          <legend>Event Setup Details</legend>
+          
+          <p>
+            <label for="event-title">Tournament Title:</label><br>
+            <input type="text" id="event-title" required placeholder="Minecraft: 100 Players Island Survival">
+          </p>
+
+          <p>
+            <label for="event-game">Game Title:</label><br>
+            <input type="text" id="event-game" required placeholder="Minecraft">
+          </p>
+
+          <p>
+            <label for="event-prize">Prize Pool Amount (INR ₹):</label><br>
+            <input type="number" id="event-prize" required placeholder="4000">
+          </p>
+
+          <p>
+            <label for="event-max-players">Max Players Limit:</label><br>
+            <input type="number" id="event-max-players" required placeholder="100">
+          </p>
+
+          <p>
+            <label for="event-drive">Google Drive Submissions Folder URL (Unique Upload Feature):</label><br>
+            <input type="url" id="event-drive" required placeholder="https://drive.google.com/drive/folders/your-folder-id">
+            <br><small>Players will be instructed to name files as InGameID_FullName.mp4 and upload them directly to this folder.</small>
+          </p>
+
+          <p>
+            <label for="event-closes-at">Registration Closing Date & Time (Optional):</label><br>
+            <input type="datetime-local" id="event-closes-at">
+          </p>
+
+          <p>
+            <label for="event-status">Registration Status:</label><br>
+            <select id="event-status" required>
+              <option value="Open">Open</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </p>
+
+          <p>
+            <label for="event-rules">Rules / Event Description:</label><br>
+            <textarea id="event-rules" rows="4" cols="50" placeholder="Survival mode. Last player standing wins. Teaming is allowed..."></textarea>
+          </p>
+
+          <!-- Customizable Registration Form Fields -->
+          <fieldset>
+            <legend>Required Player Registration Fields (Custom Form Setup)</legend>
+            <p>Select which fields will be displayed and validated on the player registration form for this specific tournament:</p>
+            <label><input type="checkbox" name="registrationFields" value="fullName" checked> Full Name (Text)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="age" checked> Age (Number)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="email" checked> Email Address (Email)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="discordUsername" checked> Discord Username (Text)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="phone" checked> WhatsApp / Mobile Number (Number)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="hasWorkingMic" checked> Working Microphone? (Yes / No Radio)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="game" checked> Select Game (Dropdown)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="ign" checked> In-Game Name (IGN) (Text)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="uid" checked> In-Game Character ID / UID (Text)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="rank" checked> Current Rank / Level (Dropdown)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="device" checked> Gaming Device (Dropdown)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="whySelect" checked> Why should we select you? (Paragraph)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="creatorLink" checked> Content Creator Link? (URL / Optional)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="teamStatus" checked> Team Status (Solo / Squad Dropdown)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="teamName" checked> Team/Clan Name (Text / Optional)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="secondaryGames" checked> Secondary Game Interest (Checkboxes)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="referral" checked> How did you find us? (Dropdown)</label><br>
+            <label><input type="checkbox" name="registrationFields" value="agreedToTerms" checked> Terms & Conditions Agreement (Checkbox)</label>
+          </fieldset>
+
+          <p>
+            <button type="submit">Publish Event</button>
+          </p>
+        </fieldset>
+      </form>
+      <p id="event-form-message"></p>
+    </section>
+
+    <hr>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
+  </footer>
+
+  <script>
+    const logoutBtn = document.getElementById('admin-logout-btn');
+    const createForm = document.getElementById('create-event-form');
+    const formMessage = document.getElementById('event-form-message');
+
+    // On Load: Check if token exists
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        window.location.href = '/admin';
+        return;
+      }
+    });
+
+    // Handle Log Out
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('adminToken');
+      window.location.href = '/admin';
+    });
+
+    // Handle Event Submission POST
+    createForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      formMessage.textContent = 'Publishing tournament event...';
+      const token = localStorage.getItem('adminToken');
+
+      const title = document.getElementById('event-title').value;
+      const gameTitle = document.getElementById('event-game').value;
+      const prizePool = document.getElementById('event-prize').value;
+      const maxPlayers = document.getElementById('event-max-players').value;
+      const driveLink = document.getElementById('event-drive').value;
+      const status = document.getElementById('event-status').value;
+      const rules = document.getElementById('event-rules').value;
+      const closesAt = document.getElementById('event-closes-at').value || null;
+
+      const registrationFields = [];
+      document.querySelectorAll('input[name="registrationFields"]:checked').forEach(cb => {
+        registrationFields.push(cb.value);
+      });
+
+      try {
+        const response = await fetch('/api/admin/events', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ title, gameTitle, prizePool, maxPlayers, driveLink, status, rules, registrationFields, closesAt })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          formMessage.textContent = `Success: ${data.message}`;
+          createForm.reset();
+        } else {
+          formMessage.textContent = `Error: ${data.message}`;
+          if (response.status === 401) {
+            localStorage.removeItem('adminToken');
+            setTimeout(() => { window.location.href = '/admin'; }, 1500);
+          }
+        }
+      } catch (error) {
+        console.error('Create Event Error:', error);
+        formMessage.textContent = 'Error: Failed to connect to server.';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Environment variables (NEVER commit secrets)
+.env
+
+# macOS system files
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beast Arena - Simulated OAuth2</title>
+  <link rel="stylesheet" href="/index.css">
+</head>
+<body>
+  <main>
+    <section style="max-width: 500px; margin: 5rem auto; padding: 2rem;">
+      <h2 id="oauth-title">Simulated OAuth2 Authorization</h2>
+      <p id="oauth-desc">You are simulating logging in via a third-party provider. Please provide the profile details you want to return to Beast Arena Gaming Network.</p>
+      
+      <form id="oauth-form">
+        <fieldset>
+          <legend id="oauth-provider">OAuth2 Provider: Loading...</legend>
+          
+          <p>
+            <label for="oauth-email">Simulated Email Address:</label><br>
+            <input type="email" id="oauth-email" required placeholder="player@example.com" value="oauth-player@example.com">
+          </p>
+
+          <p>
+            <label for="oauth-username">Simulated Username / Display Name:</label><br>
+            <input type="text" id="oauth-username" required placeholder="GamerPro" value="OAuthGamer">
+          </p>
+
+          <p>
+            <button type="submit" class="primary-btn">Authorize & Log In</button>
+            <button type="button" id="cancel-btn" style="background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-weight: 600; padding: 0.625rem 1.25rem; font-size: 0.95rem; border-radius: 6px; cursor: pointer; margin-left: 0.5rem;">Cancel</button>
+          </p>
+        </fieldset>
+      </form>
+    </section>
+  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const provider = urlParams.get('provider') || 'google';
+      const callbackUrl = urlParams.get('callbackUrl') || `/api/auth/${provider}/callback`;
+      const state = urlParams.get('state') || '';
+
+      const oauthTitle = document.getElementById('oauth-title');
+      const oauthProvider = document.getElementById('oauth-provider');
+      const oauthForm = document.getElementById('oauth-form');
+      const cancelBtn = document.getElementById('cancel-btn');
+
+      // Capitalize provider name
+      const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
+      oauthTitle.textContent = `Authorize Beast Arena via ${providerName}`;
+      oauthProvider.textContent = `OAuth2 Provider: ${providerName}`;
+
+      cancelBtn.addEventListener('click', () => {
+        window.location.href = '/login';
+      });
+
+      oauthForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('oauth-email').value;
+        const username = document.getElementById('oauth-username').value;
+
+        // Build redirect URI to callback url with mock data
+        const redirectUrl = new URL(callbackUrl, window.location.origin);
+        redirectUrl.searchParams.set('code', 'mock_auth_code_' + Date.now());
+        redirectUrl.searchParams.set('state', state);
+        redirectUrl.searchParams.set('mock_email', email);
+        redirectUrl.searchParams.set('mock_name', username);
+
+        window.location.href = redirectUrl.toString();
+      });
+    });
+  </script>
+</body>
+</html>

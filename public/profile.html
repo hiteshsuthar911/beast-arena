@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - Beast Arena Gaming Network</title>
+  <link rel="stylesheet" href="/index.css">
+  <script src="/nav.js" defer></script>
+</head>
+<body>
+
+  <header>
+    <h1>Beast Arena Gaming Network</h1>
+    <p><strong>Where Mass Entertainment Meets Esports</strong></p>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About Us</a></li>
+        <li><a href="/login">Player Portal (Login)</a></li>
+        <li><a href="/winners">Past Winners</a></li>
+        <li><a href="/register">Tournament Registration</a></li>
+        <li><a href="/profile">My Profile</a></li>
+        <li><button id="player-logout-btn" type="button">Log Out</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <hr>
+
+    <section id="player-profile-section">
+      <h2>Player Dashboard</h2>
+      <fieldset>
+        <legend>Account Summary</legend>
+        <p><strong>Email Address:</strong> <span id="player-email-display">Loading...</span></p>
+      </fieldset>
+    </section>
+
+    <hr>
+
+    <!-- Player Submissions Tracker Ledger -->
+    <section id="player-applications-section">
+      <h2>My Tournament Applications</h2>
+      <p>Verify your submissions status and confirm your Google Drive video upload filenames.</p>
+      
+      <div class="table-container">
+        <table border="1" id="history-table">
+          <thead>
+            <tr>
+              <th>Applied Tournament</th>
+              <th>Player IGN</th>
+              <th>Expected Video Filename</th>
+              <th>Date Submitted</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="4">Loading application history...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
+  </footer>
+
+  <script>
+    let eventsMap = {};
+
+    // Authentication wall check & load data
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('playerToken');
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+
+      // Logout handler
+      const logoutBtn = document.getElementById('player-logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('playerToken');
+          window.location.href = '/login';
+        });
+      }
+
+      // Display player email
+      try {
+        const decoded = atob(token);
+        const email = decoded.split(':')[0];
+        if (email) {
+          document.getElementById('player-email-display').textContent = email;
+        }
+      } catch (e) {
+        console.error('Failed to parse player email:', e);
+        document.getElementById('player-email-display').textContent = 'Error loading account';
+      }
+
+      // Fetch tournaments list to map eventId to Title
+      await loadEventsMap();
+
+      // Fetch player applications
+      loadPlayerApplications(token);
+    });
+
+    // Fetch active events list to resolve names
+    async function loadEventsMap() {
+      try {
+        const response = await fetch('/api/events/active');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.events) {
+            data.events.forEach(evt => {
+              eventsMap[evt._id] = evt.title;
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Failed to map events:', error);
+      }
+    }
+
+    // Fetch and populate applications table
+    async function loadPlayerApplications(token) {
+      const historyTableBody = document.querySelector('#history-table tbody');
+      try {
+        const response = await fetch('/api/player/applications', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.status === 401) {
+          localStorage.removeItem('playerToken');
+          window.location.href = '/login';
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.applications.length > 0) {
+          historyTableBody.innerHTML = '';
+          data.applications.forEach(app => {
+            const row = document.createElement('tr');
+            
+            // Resolve tournament title
+            const eventTitle = eventsMap[app.eventId] || 'Minecraft: 100 Players Island Survival (Legacy)';
+            
+            const eventCell = document.createElement('td');
+            eventCell.textContent = eventTitle;
+            row.appendChild(eventCell);
+
+            const ignCell = document.createElement('td');
+            ignCell.textContent = app.ign || 'N/A';
+            row.appendChild(ignCell);
+
+            const fileCell = document.createElement('td');
+            if (app.ign && app.fullName) {
+              const cleanIGN = app.ign.replace(/[^a-zA-Z0-9]/g, '_');
+              const cleanName = app.fullName.replace(/[^a-zA-Z0-9]/g, '_');
+              fileCell.textContent = `${cleanIGN}_${cleanName}.mp4`;
+            } else {
+              fileCell.textContent = 'N/A';
+            }
+            row.appendChild(fileCell);
+
+            const dateCell = document.createElement('td');
+            dateCell.textContent = app.submittedAt ? new Date(app.submittedAt).toLocaleString() : 'N/A';
+            row.appendChild(dateCell);
+
+            historyTableBody.appendChild(row);
+          });
+        } else {
+          historyTableBody.innerHTML = '<tr><td colspan="4">You have not submitted any applications yet.</td></tr>';
+        }
+      } catch (error) {
+        console.error('Failed to load history:', error);
+        historyTableBody.innerHTML = '<tr><td colspan="4">Error loading application history.</td></tr>';
+      }
+    }
+  </script>
+</body>
+</html>

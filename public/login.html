@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Player Portal - Beast Arena Gaming Network</title>
+  <link rel="stylesheet" href="/index.css">
+  <script src="/nav.js" defer></script>
+</head>
+<body>
+
+  <header>
+    <h1>Beast Arena Gaming Network</h1>
+    <p><strong>Where Mass Entertainment Meets Esports</strong></p>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About Us</a></li>
+        <li><a href="/login">Player Portal (Login)</a></li>
+        <li><a href="/winners">Past Winners</a></li>
+        <li><a href="/register">Tournament Registration</a></li>
+        <li><a href="/profile">My Profile</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <hr>
+
+    <section id="auth">
+      <h2>Player Authentication Portal</h2>
+      <p>Secure player log in. An account is required to browse the network and apply for events.</p>
+      
+      <p>
+        <button id="discord-login-btn" type="button">Continue with Discord</button>
+        <button id="google-login-btn" type="button">Continue with Google</button>
+      </p>
+
+      <form id="login-form">
+        <fieldset>
+          <legend>Or Account Login via Email</legend>
+          
+          <p>
+            <label for="login-email">Email:</label><br>
+            <input type="email" id="login-email" name="email" required placeholder="player@example.com">
+          </p>
+
+          <p>
+            <label for="login-password">Password:</label><br>
+            <input type="password" id="login-password" name="password" required placeholder="••••••••">
+          </p>
+
+          <p>
+            <button type="submit">Login / Register</button>
+          </p>
+        </fieldset>
+      </form>
+      
+      <p id="auth-message"></p>
+    </section>
+
+    <hr>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
+  </footer>
+
+  <script>
+    // Redirect immediately if already logged in
+    document.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('playerToken')) {
+        window.location.href = '/';
+      }
+    });
+
+    // Handle Social Login redirects
+    document.getElementById('discord-login-btn').addEventListener('click', () => {
+      window.location.href = '/api/auth/discord/login';
+    });
+
+    document.getElementById('google-login-btn').addEventListener('click', () => {
+      window.location.href = '/api/auth/google/login';
+    });
+
+    // Handle Authentication Portal submit
+    const loginForm = document.getElementById('login-form');
+    const authMessage = document.getElementById('auth-message');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      authMessage.textContent = 'Processing request...';
+      
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+
+      try {
+        const response = await fetch('/api/auth/login-register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          authMessage.textContent = `Success: ${data.message}`;
+          localStorage.setItem('playerToken', data.token);
+          loginForm.reset();
+          
+          // Redirect to Home page after a tiny delay to show success
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 800);
+        } else {
+          authMessage.textContent = `Error: ${data.message}`;
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        authMessage.textContent = 'Error: Failed to connect to backend server.';
+      }
+    });
+  </script>
+</body>
+</html>

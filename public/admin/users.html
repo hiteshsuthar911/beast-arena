@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage User Accounts - Admin Panel</title>
+  <link rel="stylesheet" href="/index.css">
+  <script src="/nav.js" defer></script>
+</head>
+<body>
+
+  <header>
+    <h1>Beast Arena Gaming Network - Control Panel</h1>
+    <p><strong>Registered User Accounts Database</strong></p>
+    
+    <nav>
+      <ul>
+        <li><a href="/admin">Dashboard Home</a></li>
+        <li><a href="/admin/create-event">Create Tournament</a></li>
+        <li><a href="/admin/events">Current Tournaments</a></li>
+        <li><a href="/admin/users">View User Accounts</a></li>
+        <li><a href="/admin/applications">View Player Applications</a></li>
+        <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <hr>
+
+    <section id="users-list-section">
+      <h2>Registered Player Accounts</h2>
+      <p>Users who completed authentication via email/password.</p>
+      
+      <div class="table-container">
+        <table border="1" id="users-table">
+          <thead>
+            <tr>
+              <th>Email Address</th>
+              <th>Registered At</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="2">Loading users database...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
+  </footer>
+
+  <script>
+    const logoutBtn = document.getElementById('admin-logout-btn');
+
+    // On Load: Check if token exists
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        window.location.href = '/admin';
+        return;
+      }
+
+      loadUsers(token);
+    });
+
+    // Handle Log Out
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('adminToken');
+      window.location.href = '/admin';
+    });
+
+    // Load registered users list
+    async function loadUsers(token) {
+      const usersTableBody = document.querySelector('#users-table tbody');
+      try {
+        const response = await fetch('/api/admin/users', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.status === 401) {
+          localStorage.removeItem('adminToken');
+          window.location.href = '/admin';
+          return;
+        }
+
+        const data = await response.json();
+        
+        if (data.success && data.users.length > 0) {
+          usersTableBody.innerHTML = '';
+          data.users.forEach(user => {
+            const row = document.createElement('tr');
+            
+            const emailCell = document.createElement('td');
+            emailCell.textContent = user.email;
+            row.appendChild(emailCell);
+            
+            const dateCell = document.createElement('td');
+            dateCell.textContent = user.createdAt ? new Date(user.createdAt).toLocaleString() : 'N/A';
+            row.appendChild(dateCell);
+            
+            usersTableBody.appendChild(row);
+          });
+        } else {
+          usersTableBody.innerHTML = '<tr><td colspan="2">No registered users found.</td></tr>';
+        }
+      } catch (error) {
+        console.error('Failed to load users:', error);
+        usersTableBody.innerHTML = '<tr><td colspan="2">Error loading user database.</td></tr>';
+      }
+    }
+  </script>
+</body>
+</html>

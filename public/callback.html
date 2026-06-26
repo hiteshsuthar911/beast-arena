@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beast Arena - Authenticating...</title>
+  <link rel="stylesheet" href="/index.css">
+</head>
+<body>
+  <main>
+    <section style="text-align: center; margin-top: 5rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+      <h2>Authenticating with Beast Arena</h2>
+      <p id="status-msg">Processing authorization callback. Please wait...</p>
+    </section>
+  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      const error = urlParams.get('error');
+
+      const statusMsg = document.getElementById('status-msg');
+
+      if (error) {
+        statusMsg.textContent = 'Authentication error: ' + decodeURIComponent(error);
+        statusMsg.style.color = '#dc2626';
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 3000);
+      } else if (token) {
+        localStorage.setItem('playerToken', token);
+        statusMsg.textContent = 'Login successful! Redirecting to portal...';
+        statusMsg.style.color = '#16a34a';
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1000);
+      } else {
+        statusMsg.textContent = 'Error: No authorization token received. Redirecting...';
+        statusMsg.style.color = '#dc2626';
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+      }
+    });
+  </script>
+</body>
+</html>

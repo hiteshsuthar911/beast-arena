@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tournament Registration - Beast Arena Gaming Network</title>
+  <link rel="stylesheet" href="/index.css">
+  <script src="/nav.js" defer></script>
+</head>
+<body>
+
+  <header>
+    <h1>Beast Arena Gaming Network</h1>
+    <p><strong>Where Mass Entertainment Meets Esports</strong></p>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About Us</a></li>
+        <li><a href="/login">Player Portal (Login)</a></li>
+        <li><a href="/winners">Past Winners</a></li>
+        <li><a href="/register">Tournament Registration</a></li>
+        <li><a href="/profile">My Profile</a></li>
+        <li><button id="player-logout-btn" type="button">Log Out</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <hr>
+
+    <section id="event-registration">
+      <h2>Advanced Tournament Application</h2>
+      <p>Complete the profile fields below. Only fields configured for your selected tournament will be active.</p>
+      
+      <form id="registration-form">
+        <fieldset>
+          <legend>Official Player Application Form</legend>
+
+          <!-- SELECT TARGET EVENT -->
+          <p>
+            <label for="reg-event">Choose Tournament Event to Apply:</label><br>
+            <select id="reg-event" name="eventId" required>
+              <option value="" disabled selected>-- Loading active tournaments... --</option>
+            </select>
+          </p>
+
+          <!-- FIELDSET 1: PERSONAL & CONTACT DETAILS -->
+          <fieldset id="group-personal" hidden>
+            <legend>1. Personal Profile & Contact Details</legend>
+            
+            <p id="container-fullName" hidden>
+              <label for="reg-name">Full Name (for verifying identities & prize payouts):</label><br>
+              <input type="text" id="reg-name" name="fullName" placeholder="John Doe">
+            </p>
+
+            <p id="container-age" hidden>
+              <label for="reg-age">Age (ideal age group: 15–25):</label><br>
+              <input type="number" id="reg-age" name="age" min="13" max="100" placeholder="18">
+            </p>
+
+            <p id="container-email" hidden>
+              <label for="reg-email">Email Address (for match confirmations & schedule alerts):</label><br>
+              <input type="email" id="reg-email" name="email" readonly placeholder="player@example.com">
+              <br><small>Locked to active authenticated portal account email.</small>
+            </p>
+
+            <p id="container-discordUsername" hidden>
+              <label for="reg-discord">Discord Username (for tagging & match roles):</label><br>
+              <input type="text" id="reg-discord" name="discordUsername" placeholder="username#0000 or username">
+            </p>
+
+            <p id="container-phone" hidden>
+              <label for="reg-phone">WhatsApp / Mobile Number (for emergency contact on match day):</label><br>
+              <input type="tel" id="reg-phone" name="phone" placeholder="9876543210" pattern="[0-9+ \-]{8,15}">
+            </p>
+
+            <fieldset id="container-hasWorkingMic" hidden>
+              <legend>Do you have a working microphone and Discord installed?</legend>
+              <p><em>(Automatic rejection if you do not have a working mic)</em></p>
+              <label>
+                <input type="radio" name="hasWorkingMic" value="true"> Yes, ready
+              </label><br>
+              <label>
+                <input type="radio" name="hasWorkingMic" value="false"> No
+              </label>
+            </fieldset>
+          </fieldset>
+
+          <!-- FIELDSET 2: GAMING PROFILE -->
+          <fieldset id="group-gaming" hidden>
+            <legend>2. Gamer Profile & Character Verifications</legend>
+            
+            <p id="container-game" hidden>
+              <label for="reg-game">Select Game to Match (Minecraft / Valorant / BGMI Dropdown):</label><br>
+              <select id="reg-game" name="game">
+                <option value="" disabled selected>-- Choose Game --</option>
+                <option value="Minecraft">Minecraft</option>
+                <option value="Valorant">Valorant</option>
+                <option value="BGMI">BGMI (Battlegrounds Mobile India)</option>
+              </select>
+            </p>
+
+            <p id="container-ign" hidden>
+              <label for="reg-ign">In-Game Name (IGN) (identifies your character inside the match room):</label><br>
+              <input type="text" id="reg-ign" name="ign" placeholder="BeastPlayer123">
+            </p>
+
+            <p id="container-uid" hidden>
+              <label for="reg-uid">In-Game Character ID / UID (numerical verification, especially for fonts):</label><br>
+              <input type="text" id="reg-uid" name="uid" placeholder="5123456789 (or Minecraft UUID)">
+            </p>
+
+            <p id="container-rank" hidden>
+              <label for="reg-rank">Current Rank / Level (for balancing teams & creation of brackets):</label><br>
+              <select id="reg-rank" name="rank">
+                <option value="" disabled selected>-- Select Rank/Level --</option>
+                <option value="Bronze/Silver">Bronze / Silver</option>
+                <option value="Gold/Platinum">Gold / Platinum</option>
+                <option value="Diamond/Diamond Elite">Diamond / Diamond Elite</option>
+                <option value="Master/Challenger">Master / Challenger / Radiant</option>
+              </select>
+            </p>
+
+            <p id="container-device" hidden>
+              <label for="reg-device">Gaming Device (system compatibility with the host):</label><br>
+              <select id="reg-device" name="device">
+                <option value="" disabled selected>-- Select Device --</option>
+                <option value="PC">PC (Desktop)</option>
+                <option value="Laptop">Laptop</option>
+                <option value="Mobile">Mobile (Smartphone)</option>
+              </select>
+            </p>
+          </fieldset>
+
+          <!-- FIELDSET 3: SCREENING QUESTIONS & VIDEO LINK -->
+          <fieldset id="group-screening" hidden>
+            <legend>3. Video Submissions & Screening Pitch</legend>
+            
+            <p id="container-whySelect" hidden>
+              <label for="reg-why">Why should we select you? (screen for funny, confident, or energetic players):</label><br>
+              <textarea id="reg-why" name="whySelect" rows="4" cols="50" placeholder="Describe your playstyle, why you'd be a great fit..."></textarea>
+            </p>
+
+            <p id="container-creatorLink" hidden>
+              <label for="reg-creator">Content Creator Link? (YouTube / Twitch / optional):</label><br>
+              <input type="url" id="reg-creator" name="creatorLink" placeholder="https://youtube.com/@channel">
+            </p>
+
+            <p id="container-teamStatus" hidden>
+              <label for="reg-team-status">Team Status:</label><br>
+              <select id="reg-team-status" name="teamStatus">
+                <option value="Solo">Solo (Individual Challenger)</option>
+                <option value="Squad">Joining with a Squad (Friends / Clan)</option>
+              </select>
+            </p>
+
+            <p id="container-teamName" hidden>
+              <label for="reg-team-name">Team/Clan Name (Optional):</label><br>
+              <input type="text" id="reg-team-name" name="teamName" placeholder="Alpha Team">
+            </p>
+
+            <!-- Dynamic File Upload Instructions Box (Only shown if Google Drive folder is configured on event) -->
+            <fieldset id="drive-upload-instructions" hidden>
+              <legend>Gameplay Showcase Video Submission</legend>
+              <p>This tournament requires a gameplay video submission.</p>
+              <p>
+                1. Open our official Google Drive folder link: 
+                <a id="drive-folder-link" href="#" target="_blank"><strong>Open Google Drive Folder</strong></a>
+              </p>
+              <p>2. Upload your gameplay recording clip (.mp4).</p>
+              <p>
+                3. <strong>CRITICAL FILENAME RULE:</strong> You MUST name your uploaded video file exactly: 
+                <code id="expected-upload-filename">IGN_FullName.mp4</code>
+                <br>Based on your details, name your file: <strong id="dynamic-filename-indicator">PLAYERIGN_PLAYERNAME.mp4</strong>
+              </p>
+            </fieldset>
+          </fieldset>
+
+          <!-- FIELDSET 4: GENERAL INTERESTS & MARKETING -->
+          <fieldset id="group-survey" hidden>
+            <legend>4. Community Surveys & Referral</legend>
+            
+            <fieldset id="container-secondaryGames" hidden>
+              <legend>Secondary Game Interests</legend>
+              <p>Check any other games you play regularly (helps map future channel video concepts):</p>
+              <label>
+                <input type="checkbox" name="secondaryGames" value="Minecraft"> Minecraft
+              </label><br>
+              <label>
+                <input type="checkbox" name="secondaryGames" value="Valorant"> Valorant
+              </label><br>
+              <label>
+                <input type="checkbox" name="secondaryGames" value="BGMI"> BGMI
+              </label><br>
+              <label>
+                <input type="checkbox" name="secondaryGames" value="Others"> Others
+              </label>
+            </fieldset>
+
+            <p id="container-referral" hidden>
+              <label for="reg-referral">How did you find us?</label><br>
+              <select id="reg-referral" name="referral">
+                <option value="" disabled selected>-- Select Source --</option>
+                <option value="YouTube">YouTube</option>
+                <option value="Instagram">Instagram</option>
+                <option value="Discord">Discord</option>
+                <option value="Friend">Friend Referral</option>
+              </select>
+            </p>
+          </fieldset>
+
+          <!-- FIELDSET 5: TERMS DECLARATION -->
+          <fieldset id="group-consent" hidden>
+            <legend>5. Declaration & Consent</legend>
+            
+            <p id="container-agreedToTerms" hidden>
+              <label>
+                <input type="checkbox" id="reg-terms" name="agreedToTerms">
+                <strong>I agree to the tournament rules, anti-cheat regulations, fair-play policies, and standard video distribution consent.</strong>
+              </label>
+            </p>
+
+            <p>
+              <button type="submit">Submit Application</button>
+            </p>
+          </fieldset>
+
+        </fieldset>
+      </form>
+      
+      <p id="reg-message"></p>
+    </section>
+
+    <hr>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
+  </footer>
+
+  <script>
+    let eventsList = [];
+
+    // Authentication wall check & auto fill email
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('playerToken');
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+
+      // Logout handler
+      const logoutBtn = document.getElementById('player-logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('playerToken');
+          window.location.href = '/login';
+        });
+      }
+
+      // Decode token to retrieve player email automatically
+      try {
+        const decoded = atob(token);
+        const email = decoded.split(':')[0];
+        if (email) {
+          document.getElementById('reg-email').value = email;
+        }
+      } catch (e) {
+        console.error('Failed to decode player token:', e);
+      }
+
+      // Load active events from database
+      await loadActiveEvents();
+    });
+
+    // Load active tournaments
+    async function loadActiveEvents() {
+      const eventSelect = document.getElementById('reg-event');
+      try {
+        const response = await fetch('/api/events/active');
+        const data = await response.json();
+
+        if (data.success && data.events.length > 0) {
+          eventsList = data.events;
+          eventSelect.innerHTML = '<option value="" disabled selected>-- Choose a Tournament Event --</option>';
+          data.events.forEach(evt => {
+            const opt = document.createElement('option');
+            opt.value = evt._id;
+            opt.textContent = `${evt.title} (${evt.gameTitle}) | Prize: ₹${evt.prizePool.toLocaleString()}`;
+            eventSelect.appendChild(opt);
+          });
+        } else {
+          eventSelect.innerHTML = '<option value="" disabled>No active tournament events found.</option>';
+        }
+      } catch (error) {
+        console.error('Failed to load events:', error);
+        eventSelect.innerHTML = '<option value="" disabled>Error loading tournaments.</option>';
+      }
+    }
+
+    // Dynamic Google Drive instruction updates
+    const eventSelect = document.getElementById('reg-event');
+    const driveInstructions = document.getElementById('drive-upload-instructions');
+    const driveLink = document.getElementById('drive-folder-link');
+    const filenameIndicator = document.getElementById('dynamic-filename-indicator');
+
+    const nameInput = document.getElementById('reg-name');
+    const ignInput = document.getElementById('reg-ign');
+
+    function updateExpectedFilename() {
+      const ignVal = ignInput.value.trim() ? ignInput.value.trim().replace(/[^a-zA-Z0-9]/g, '_') : 'PLAYERIGN';
+      const nameVal = nameInput.value.trim() ? nameInput.value.trim().replace(/[^a-zA-Z0-9]/g, '_') : 'PLAYERNAME';
+      filenameIndicator.textContent = `${ignVal}_${nameVal}.mp4`;
+    }
+
+    nameInput.addEventListener('input', updateExpectedFilename);
+    ignInput.addEventListener('input', updateExpectedFilename);
+
+    // Dynamic show/hide form fields handler
+    eventSelect.addEventListener('change', () => {
+      const selectedId = eventSelect.value;
+      const selectedEvent = eventsList.find(e => e._id === selectedId);
+
+      if (!selectedEvent) {
+        hideAllFieldsets();
+        return;
+      }
+
+      // 1. Get enabled fields config array
+      const enabledFields = selectedEvent.registrationFields || [];
+
+      // 2. Define list of all customizable form fields
+      const allFormFields = [
+        'fullName', 'age', 'email', 'discordUsername', 'phone', 'hasWorkingMic',
+        'game', 'ign', 'uid', 'rank', 'device', 'whySelect', 'creatorLink',
+        'teamStatus', 'teamName', 'secondaryGames', 'referral', 'agreedToTerms'
+      ];
+
+      // Fields that are optional by nature (never marked required even if enabled)
+      const optionalFields = ['creatorLink', 'teamName', 'secondaryGames'];
+
+      // 3. Toggle individual fields visibility and required states
+      allFormFields.forEach(key => {
+        const container = document.getElementById('container-' + key);
+        if (container) {
+          const isEnabled = enabledFields.includes(key);
+          
+          if (isEnabled) {
+            container.removeAttribute('hidden');
+          } else {
+            container.setAttribute('hidden', '');
+          }
+
+          // Toggle required constraints on inner input elements
+          const inputs = container.querySelectorAll('input, select, textarea');
+          inputs.forEach(input => {
+            const mustRequire = isEnabled && !optionalFields.includes(key);
+            if (mustRequire) {
+              input.required = true;
+            } else {
+              input.required = false;
+            }
+          });
+        }
+      });
+
+      // 4. Update dynamic fieldset headers visibility
+      toggleFieldsetsVisibility();
+
+      // 5. Update dynamic Google Drive links
+      if (enabledFields.includes('ign') && enabledFields.includes('fullName') && selectedEvent.driveLink) {
+        driveInstructions.removeAttribute('hidden');
+        driveLink.href = selectedEvent.driveLink;
+        updateExpectedFilename();
+      } else {
+        driveInstructions.setAttribute('hidden', '');
+      }
+    });
+
+    function toggleFieldsetsVisibility() {
+      const fieldsets = ['group-personal', 'group-gaming', 'group-screening', 'group-survey', 'group-consent'];
+      fieldsets.forEach(id => {
+        const fs = document.getElementById(id);
+        const visibleChildren = fs.querySelectorAll('[id^="container-"]:not([hidden])');
+        if (visibleChildren.length > 0) {
+          fs.removeAttribute('hidden');
+        } else {
+          fs.setAttribute('hidden', '');
+        }
+      });
+    }
+
+    function hideAllFieldsets() {
+      const fieldsets = ['group-personal', 'group-gaming', 'group-screening', 'group-survey', 'group-consent'];
+      fieldsets.forEach(id => {
+        document.getElementById(id).setAttribute('hidden', '');
+      });
+      driveInstructions.setAttribute('hidden', '');
+    }
+
+    // Handle Active Event Registration Form submit
+    const regForm = document.getElementById('registration-form');
+    const regMessage = document.getElementById('reg-message');
+
+    regForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      regMessage.textContent = 'Submitting application...';
+
+      const token = localStorage.getItem('playerToken');
+      if (!token) {
+        regMessage.textContent = 'Error: You must be logged in to apply. Redirecting to login...';
+        setTimeout(() => { window.location.href = '/login'; }, 1500);
+        return;
+      }
+
+      // Check if event is selected
+      const eventId = eventSelect.value;
+      const selectedEvent = eventsList.find(e => e._id === eventId);
+      if (!selectedEvent) {
+        regMessage.textContent = 'Error: Please select a tournament event.';
+        return;
+      }
+
+      const enabledFields = selectedEvent.registrationFields || [];
+
+      // Validate microphone prompt ONLY if enabled
+      if (enabledFields.includes('hasWorkingMic')) {
+        const micSelected = document.querySelector('input[name="hasWorkingMic"]:checked').value;
+        if (micSelected === 'false') {
+          regMessage.textContent = 'Rejection: A working microphone is required to participate in Beast Arena tournaments.';
+          alert('Automatic Rejection: A working microphone is required to participate.');
+          return;
+        }
+      }
+
+      // Read values dynamically based on enabled states
+      const fullName = enabledFields.includes('fullName') ? nameInput.value : undefined;
+      const age = enabledFields.includes('age') ? document.getElementById('reg-age').value : undefined;
+      const email = enabledFields.includes('email') ? document.getElementById('reg-email').value : undefined;
+      const discordUsername = enabledFields.includes('discordUsername') ? document.getElementById('reg-discord').value : undefined;
+      const phone = enabledFields.includes('phone') ? document.getElementById('reg-phone').value : undefined;
+      const hasWorkingMic = enabledFields.includes('hasWorkingMic') ? (document.querySelector('input[name="hasWorkingMic"]:checked').value === 'true') : undefined;
+      const game = enabledFields.includes('game') ? document.getElementById('reg-game').value : undefined;
+      const ign = enabledFields.includes('ign') ? ignInput.value : undefined;
+      const uid = enabledFields.includes('uid') ? document.getElementById('reg-uid').value : undefined;
+      const rank = enabledFields.includes('rank') ? document.getElementById('reg-rank').value : undefined;
+      const device = enabledFields.includes('device') ? document.getElementById('reg-device').value : undefined;
+      const whySelect = enabledFields.includes('whySelect') ? document.getElementById('reg-why').value : undefined;
+      const creatorLink = enabledFields.includes('creatorLink') ? document.getElementById('reg-creator').value : undefined;
+      const teamStatus = enabledFields.includes('teamStatus') ? document.getElementById('reg-team-status').value : undefined;
+      const teamName = enabledFields.includes('teamName') ? document.getElementById('reg-team-name').value : undefined;
+      const referral = enabledFields.includes('referral') ? document.getElementById('reg-referral').value : undefined;
+      const agreedToTerms = enabledFields.includes('agreedToTerms') ? document.getElementById('reg-terms').checked : undefined;
+
+      const secondaryGames = [];
+      if (enabledFields.includes('secondaryGames')) {
+        document.querySelectorAll('input[name="secondaryGames"]:checked').forEach(cb => {
+          secondaryGames.push(cb.value);
+        });
+      }
+
+      try {
+        const response = await fetch('/api/events/register', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            eventId,
+            fullName,
+            age: age ? Number(age) : null,
+            email,
+            discordUsername,
+            phone,
+            hasWorkingMic,
+            game,
+            ign,
+            uid,
+            rank,
+            device,
+            whySelect,
+            creatorLink,
+            teamStatus,
+            teamName,
+            secondaryGames,
+            referral,
+            agreedToTerms
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          regMessage.textContent = `Success: ${data.message}`;
+          regForm.reset();
+          hideAllFieldsets();
+          
+          // Refill email from token
+          try {
+            const decoded = atob(token);
+            const emailVal = decoded.split(':')[0];
+            if (emailVal) document.getElementById('reg-email').value = emailVal;
+          } catch (ex) {}
+        } else {
+          regMessage.textContent = `Error: ${data.message}`;
+          if (response.status === 401) {
+            localStorage.removeItem('playerToken');
+            setTimeout(() => { window.location.href = '/login'; }, 1500);
+          }
+        }
+      } catch (error) {
+        console.error('Error submitting registration:', error);
+        regMessage.textContent = 'Error: Failed to connect to backend server.';
+      }
+    });
+  </script>
+</body>
+</html>

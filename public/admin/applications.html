@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Player Applications - Admin Panel</title>
+  <link rel="stylesheet" href="/index.css">
+  <script src="/nav.js" defer></script>
+</head>
+<body>
+
+  <header>
+    <h1>Beast Arena Gaming Network - Control Panel</h1>
+    <p><strong>Tournament Player Applications Tracker</strong></p>
+    
+    <nav>
+      <ul>
+        <li><a href="/admin">Dashboard Home</a></li>
+        <li><a href="/admin/create-event">Create Tournament</a></li>
+        <li><a href="/admin/events">Current Tournaments</a></li>
+        <li><a href="/admin/users">View User Accounts</a></li>
+        <li><a href="/admin/applications">View Player Applications</a></li>
+        <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <hr>
+
+    <section id="applications-list-section">
+      <h2>Active Tournament Submissions</h2>
+      <p>Confirm user identities, player profiles, and inspect their Google Drive video uploads.</p>
+      
+      <div class="table-container">
+        <table border="1" id="applications-table">
+          <thead>
+            <tr>
+              <th>Target Event</th>
+              <th>Player Full Name</th>
+              <th>Age</th>
+              <th>Email Address</th>
+              <th>Discord Username</th>
+              <th>WhatsApp / Phone</th>
+              <th>Working Mic?</th>
+              <th>Game Match</th>
+              <th>IGN (In-Game Name)</th>
+              <th>Character UID</th>
+              <th>Current Rank</th>
+              <th>Gaming Device</th>
+              <th>Team Status</th>
+              <th>Team / Clan Name</th>
+              <th>Why Select You? (Pitch)</th>
+              <th>Creator Link</th>
+              <th>Secondary Game Interests</th>
+              <th>Referral Source</th>
+              <th>Google Drive Video Upload (Expected Filename & Folder Link)</th>
+              <th>Submitted At</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="20">Loading application database...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
+  </footer>
+
+  <script>
+    const logoutBtn = document.getElementById('admin-logout-btn');
+    let eventsMap = {};
+
+    // On Load: Check if token exists
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        window.location.href = '/admin';
+        return;
+      }
+
+      await loadEventsMap(token);
+      loadApplications(token);
+    });
+
+    // Handle Log Out
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('adminToken');
+      window.location.href = '/admin';
+    });
+
+    // Load Events to resolve titles and links
+    async function loadEventsMap(token) {
+      try {
+        const response = await fetch('/api/admin/events', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.events) {
+            data.events.forEach(evt => {
+              eventsMap[evt._id] = {
+                title: evt.title,
+                driveLink: evt.driveLink
+              };
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Failed to map events:', error);
+      }
+    }
+
+    // Load applications list
+    async function loadApplications(token) {
+      const appTableBody = document.querySelector('#applications-table tbody');
+      try {
+        const response = await fetch('/api/admin/applications', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.status === 401) {
+          localStorage.removeItem('adminToken');
+          window.location.href = '/admin';
+          return;
+        }
+
+        const data = await response.json();
+        
+        if (data.success && data.applications.length > 0) {
+          appTableBody.innerHTML = '';
+          data.applications.forEach(app => {
+            const row = document.createElement('tr');
+            
+            // Resolve Event Title
+            const eventInfo = eventsMap[app.eventId] || { title: 'Unknown Event / Legacy', driveLink: '#' };
+            
+            const eventCell = document.createElement('td');
+            eventCell.textContent = eventInfo.title;
+            row.appendChild(eventCell);
+
+            const nameCell = document.createElement('td');
+            nameCell.textContent = app.fullName || 'N/A';
+            row.appendChild(nameCell);
+
+            const ageCell = document.createElement('td');
+            ageCell.textContent = app.age !== undefined && app.age !== null ? app.age : 'N/A';
+            row.appendChild(ageCell);
+
+            const emailCell = document.createElement('td');
+            emailCell.textContent = app.email || 'N/A';
+            row.appendChild(emailCell);
+            
+            const discordCell = document.createElement('td');
+            discordCell.textContent = app.discordUsername || 'N/A';
+            row.appendChild(discordCell);
+
+            const phoneCell = document.createElement('td');
+            phoneCell.textContent = app.phone || 'N/A';
+            row.appendChild(phoneCell);
+            
+            const micCell = document.createElement('td');
+            micCell.textContent = app.hasWorkingMic === true ? 'Yes' : (app.hasWorkingMic === false ? 'No' : 'N/A');
+            row.appendChild(micCell);
+
+            const gameCell = document.createElement('td');
+            gameCell.textContent = app.game || 'N/A';
+            row.appendChild(gameCell);
+            
+            const ignCell = document.createElement('td');
+            ignCell.textContent = app.ign || 'N/A';
+            row.appendChild(ignCell);
+
+            const uidCell = document.createElement('td');
+            uidCell.textContent = app.uid || 'N/A';
+            row.appendChild(uidCell);
+            
+            const rankCell = document.createElement('td');
+            rankCell.textContent = app.rank || 'N/A';
+            row.appendChild(rankCell);
+
+            const deviceCell = document.createElement('td');
+            deviceCell.textContent = app.device || 'N/A';
+            row.appendChild(deviceCell);
+
+            const teamStatusCell = document.createElement('td');
+            teamStatusCell.textContent = app.teamStatus || 'N/A';
+            row.appendChild(teamStatusCell);
+
+            const teamNameCell = document.createElement('td');
+            teamNameCell.textContent = app.teamName || 'N/A';
+            row.appendChild(teamNameCell);
+
+            const whyCell = document.createElement('td');
+            whyCell.textContent = app.whySelect || 'N/A';
+            row.appendChild(whyCell);
+
+            const creatorCell = document.createElement('td');
+            if (app.creatorLink) {
+              const link = document.createElement('a');
+              link.href = app.creatorLink;
+              link.target = '_blank';
+              link.textContent = 'View Link';
+              creatorCell.appendChild(link);
+            } else {
+              creatorCell.textContent = 'N/A';
+            }
+            row.appendChild(creatorCell);
+
+            const secondaryCell = document.createElement('td');
+            secondaryCell.textContent = (app.secondaryGames && app.secondaryGames.length > 0) ? app.secondaryGames.join(', ') : 'None';
+            row.appendChild(secondaryCell);
+
+            const referralCell = document.createElement('td');
+            referralCell.textContent = app.referral || 'N/A';
+            row.appendChild(referralCell);
+
+            // Google Drive custom verification column
+            const driveVerificationCell = document.createElement('td');
+            
+            // Format expected filename: IGN_FullName.mp4 safely
+            let expectedFilename = 'N/A';
+            if (app.ign || app.fullName) {
+              const cleanIGN = (app.ign || '').replace(/[^a-zA-Z0-9]/g, '_') || 'PLAYERIGN';
+              const cleanName = (app.fullName || '').replace(/[^a-zA-Z0-9]/g, '_') || 'PLAYERNAME';
+              expectedFilename = `${cleanIGN}_${cleanName}.mp4`;
+            }
+            
+            const filenameSpan = document.createElement('strong');
+            filenameSpan.textContent = expectedFilename;
+            driveVerificationCell.appendChild(filenameSpan);
+            
+            driveVerificationCell.appendChild(document.createElement('br'));
+            
+            if (eventInfo.driveLink && eventInfo.driveLink !== '#') {
+              const folderLink = document.createElement('a');
+              folderLink.href = eventInfo.driveLink;
+              folderLink.target = '_blank';
+              folderLink.textContent = 'Open Drive Folder';
+              driveVerificationCell.appendChild(folderLink);
+            } else {
+              driveVerificationCell.appendChild(document.createTextNode('No folder configured'));
+            }
+            row.appendChild(driveVerificationCell);
+            
+            const dateCell = document.createElement('td');
+            dateCell.textContent = app.submittedAt ? new Date(app.submittedAt).toLocaleString() : 'N/A';
+            row.appendChild(dateCell);
+            
+            appTableBody.appendChild(row);
+          });
+        } else {
+          appTableBody.innerHTML = '<tr><td colspan="20">No applications received yet.</td></tr>';
+        }
+      } catch (error) {
+        console.error('Failed to load applications:', error);
+        appTableBody.innerHTML = '<tr><td colspan="20">Error loading application database.</td></tr>';
+      }
+    }
+  </script>
+</body>
+</html>

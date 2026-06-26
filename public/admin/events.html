@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Current Tournaments - Admin Panel</title>
+  <link rel="stylesheet" href="/index.css">
+  <script src="/nav.js" defer></script>
+</head>
+<body>
+
+  <header>
+    <h1>Beast Arena Gaming Network - Control Panel</h1>
+    <p><strong>Tournament Event Management Ledger</strong></p>
+    
+    <nav>
+      <ul>
+        <li><a href="/admin">Dashboard Home</a></li>
+        <li><a href="/admin/create-event">Create Tournament</a></li>
+        <li><a href="/admin/events">Current Tournaments</a></li>
+        <li><a href="/admin/users">View User Accounts</a></li>
+        <li><a href="/admin/applications">View Player Applications</a></li>
+        <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <hr>
+
+    <!-- Existing Events Table -->
+    <section id="events-list-section">
+      <h2>Current Tournaments</h2>
+      <p>Inspection database of all created esports events on the network.</p>
+      
+      <div class="table-container">
+        <table border="1" id="events-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Game</th>
+              <th>Prize Pool</th>
+              <th>Max Players</th>
+              <th>Google Drive Folder</th>
+              <th>Status</th>
+              <th>Closing Deadline</th>
+              <th>Created At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="9">Loading events database...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
+  </footer>
+
+  <script>
+    const logoutBtn = document.getElementById('admin-logout-btn');
+
+    // On Load: Check if token exists
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        window.location.href = '/admin';
+        return;
+      }
+
+      // Load existing events
+      loadEvents(token);
+    });
+
+    // Handle Log Out
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('adminToken');
+      window.location.href = '/admin';
+    });
+
+    // Load Tournaments list
+    async function loadEvents(token) {
+      const eventsTableBody = document.querySelector('#events-table tbody');
+      try {
+        const response = await fetch('/api/admin/events', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.status === 401) {
+          localStorage.removeItem('adminToken');
+          window.location.href = '/admin';
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.events.length > 0) {
+          eventsTableBody.innerHTML = '';
+          data.events.forEach(evt => {
+            const row = document.createElement('tr');
+            
+            const titleCell = document.createElement('td');
+            titleCell.textContent = evt.title;
+            row.appendChild(titleCell);
+
+            const gameCell = document.createElement('td');
+            gameCell.textContent = evt.gameTitle;
+            row.appendChild(gameCell);
+
+            const prizeCell = document.createElement('td');
+            prizeCell.textContent = `₹${evt.prizePool.toLocaleString()}`;
+            row.appendChild(prizeCell);
+
+            const limitCell = document.createElement('td');
+            limitCell.textContent = evt.maxPlayers;
+            row.appendChild(limitCell);
+
+            const driveCell = document.createElement('td');
+            const driveLink = document.createElement('a');
+            driveLink.href = evt.driveLink;
+            driveLink.target = '_blank';
+            driveLink.textContent = 'Open Folder';
+            driveCell.appendChild(driveLink);
+            row.appendChild(driveCell);
+
+            const statusCell = document.createElement('td');
+            const isExpired = evt.closesAt && new Date(evt.closesAt) < new Date();
+            statusCell.textContent = evt.status + (isExpired && evt.status === 'Open' ? ' (Expired)' : '');
+            row.appendChild(statusCell);
+
+            const closesAtCell = document.createElement('td');
+            closesAtCell.textContent = evt.closesAt ? new Date(evt.closesAt).toLocaleString() : 'No Deadline';
+            row.appendChild(closesAtCell);
+
+            const dateCell = document.createElement('td');
+            dateCell.textContent = evt.createdAt ? new Date(evt.createdAt).toLocaleString() : 'N/A';
+            row.appendChild(dateCell);
+
+            const actionCell = document.createElement('td');
+            if (evt.status === 'Open') {
+              const closeBtn = document.createElement('button');
+              closeBtn.textContent = 'Close Registration';
+              closeBtn.addEventListener('click', async () => {
+                if (confirm(`Are you sure you want to close registration for "${evt.title}"?`)) {
+                  try {
+                    const res = await fetch(`/api/admin/events/${evt._id}/close`, {
+                      method: 'PUT',
+                      headers: {
+                        'Authorization': `Bearer ${token}`
+                      }
+                    });
+                    const resData = await res.json();
+                    if (resData.success) {
+                      alert(resData.message);
+                      loadEvents(token);
+                    } else {
+                      alert('Error: ' + resData.message);
+                    }
+                  } catch (err) {
+                    console.error('Error closing event:', err);
+                    alert('Failed to close event. Check console for details.');
+                  }
+                }
+              });
+              actionCell.appendChild(closeBtn);
+            } else {
+              actionCell.textContent = '-';
+            }
+            row.appendChild(actionCell);
+
+            eventsTableBody.appendChild(row);
+          });
+        } else {
+          eventsTableBody.innerHTML = '<tr><td colspan="9">No tournaments created yet.</td></tr>';
+        }
+      } catch (error) {
+        console.error('Failed to load events:', error);
+        eventsTableBody.innerHTML = '<tr><td colspan="9">Error loading tournament list.</td></tr>';
+      }
+    }
+  </script>
+</body>
+</html>

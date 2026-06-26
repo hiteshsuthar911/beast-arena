@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beast Arena Gaming Network - Home</title>
+  <link rel="stylesheet" href="/index.css">
+  <script src="/nav.js" defer></script>
+</head>
+<body>
+
+  <header>
+    <h1>Beast Arena Gaming Network</h1>
+    <p><strong>Where Mass Entertainment Meets Esports</strong></p>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About Us</a></li>
+        <li><a href="/login">Player Portal (Login)</a></li>
+        <li><a href="/winners">Past Winners</a></li>
+        <li><a href="/register">Tournament Registration</a></li>
+        <li><a href="/profile">My Profile</a></li>
+        <li><button id="player-logout-btn" type="button">Log Out</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <hr>
+
+    <section id="welcome">
+      <h2>Welcome to the Beast Arena Portal!</h2>
+      <p>
+        Beast Arena is the premier entertainment-driven esports hub hosting free-to-enter tournaments with brand-sponsored cash prizes for popular games like Minecraft, Valorant, and BGMI.
+      </p>
+      <p>
+        Use the navigation bar above to explore our company details, view our past winners, sign in to your player account, or submit an official application for our active tournaments!
+      </p>
+    </section>
+
+    <hr>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
+  </footer>
+
+  <script>
+    // Authentication wall script
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('playerToken');
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+
+      // Logout handler
+      const logoutBtn = document.getElementById('player-logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('playerToken');
+          window.location.href = '/login';
+        });
+      }
+    });
+  </script>
+</body>
+</html>
