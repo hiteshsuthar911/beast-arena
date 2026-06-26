@@ -41,23 +41,14 @@ async function sendOtpEmail(toEmail, otp) {
   }
 
   try {
-    let transporter;
-    if (!host && user.endsWith('@gmail.com')) {
-      transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: { user, pass },
-        family: 4 // Force IPv4 to prevent ENETUNREACH on Railway
-      });
-      console.log(`[Email Service] Auto-configured Gmail service for ${user}`);
-    } else {
-      transporter = nodemailer.createTransport({
-        host: host || 'smtp.gmail.com',
-        port: parseInt(port, 10),
-        secure: port === '465',
-        auth: { user, pass },
-        family: 4 // Force IPv4 to prevent ENETUNREACH on Railway
-      });
-    }
+    const transporter = nodemailer.createTransport({
+      host: host || 'smtp.gmail.com',
+      port: parseInt(port, 10),
+      secure: port === '465', // true for 465, false for other ports (like 587)
+      auth: { user, pass },
+      family: 4 // Force IPv4 to prevent ENETUNREACH on Railway
+    });
+    console.log(`[Email Service] Configured SMTP transporter: ${host || 'smtp.gmail.com'}:${port}`);
 
     const info = await transporter.sendMail({
       from: `"Beast Arena Security" <${user}>`,
