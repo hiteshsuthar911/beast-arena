@@ -16,32 +16,70 @@ body {
 /* ── Header / Nav ────────────────────────────────────────────── */
 header {
   background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 1.5rem;
 }
 
 .header-inner {
   max-width: 960px;
   margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-header h1 {
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo-svg {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logo-wrapper:hover .logo-svg {
+  transform: rotate(12deg) scale(1.08);
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-text h1 {
   margin: 0;
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: #1e1b4b;
+  font-size: 1.35rem;
+  font-weight: 850;
+  color: #0f172a;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-header p {
-  margin: 0.2rem 0 0;
+.logo-text p {
+  margin: 0;
   color: #64748b;
-  font-size: 0.85rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  line-height: 1;
 }
 
 nav ul {
   list-style: none;
   padding: 0;
-  margin: 0.75rem 0 0;
+  margin: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
@@ -493,8 +531,9 @@ footer a:hover { text-decoration: underline; }
 
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  header { padding: 1rem; }
-  header h1 { font-size: 1.15rem; }
+  header { padding: 0.75rem 1rem; }
+  .logo-text h1 { font-size: 1.15rem; }
+  .logo-svg { width: 34px; height: 34px; }
   main  { padding: 1rem; }
   section { padding: 1.1rem; }
 
@@ -523,7 +562,7 @@ footer a:hover { text-decoration: underline; }
     border: none; padding: 0.45rem 0.9rem;
     font-size: 0.875rem; font-weight: 600;
     border-radius: 6px; cursor: pointer;
-    margin-top: 0.75rem; font-family: inherit;
+    margin-top: 0; font-family: inherit;
     transition: background 0.15s, transform 0.15s;
   }
   .menu-toggle-btn:active { transform: scale(0.95); }

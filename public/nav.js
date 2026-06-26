@@ -14,7 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
   toggleBtn.className = 'menu-toggle-btn';
   toggleBtn.type = 'button';
   toggleBtn.textContent = '☰ Menu';
-  header.appendChild(toggleBtn);
+  
+  const headerInner = header.querySelector('.header-inner') || header;
+  headerInner.appendChild(toggleBtn);
 
   // Sync toggle button visibility with the desktop nav's hidden state (important for login walls)
   const syncToggleState = () => {
