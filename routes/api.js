@@ -45,7 +45,8 @@ async function sendOtpEmail(toEmail, otp) {
     if (!host && user.endsWith('@gmail.com')) {
       transporter = nodemailer.createTransport({
         service: 'gmail',
-        auth: { user, pass }
+        auth: { user, pass },
+        family: 4 // Force IPv4 to prevent ENETUNREACH on Railway
       });
       console.log(`[Email Service] Auto-configured Gmail service for ${user}`);
     } else {
@@ -53,7 +54,8 @@ async function sendOtpEmail(toEmail, otp) {
         host: host || 'smtp.gmail.com',
         port: parseInt(port, 10),
         secure: port === '465',
-        auth: { user, pass }
+        auth: { user, pass },
+        family: 4 // Force IPv4 to prevent ENETUNREACH on Railway
       });
     }
 
