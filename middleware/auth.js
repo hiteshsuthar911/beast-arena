@@ -1,3 +1,6 @@
+const mongoose = require('mongoose');
+const User = require('../models/User');
+
 // Helper Middleware to verify Admin Token
 function verifyAdminToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -32,7 +35,7 @@ function verifyAdminToken(req, res, next) {
 }
 
 // Helper Middleware to verify Player Token
-function verifyPlayerToken(req, res, next) {
+async function verifyPlayerToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   if (!authHeader) {
     return res.status(401).json({ success: false, message: 'Access denied. Please log in first.' });

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manage Player Applications - Admin Panel</title>
-  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/admin.css">
   <script src="/nav.js" defer></script>
 </head>
 <body>
@@ -56,16 +56,20 @@
               <th>Referral Source</th>
               <th>Google Drive Video Upload (Expected Filename & Folder Link)</th>
               <th>Submitted At</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td colspan="20">Loading application database...</td>
+              <td colspan="22">Loading application database...</td>
             </tr>
           </tbody>
         </table>
       </div>
     </section>
+
+
 
     <hr>
   </main>
@@ -78,13 +82,17 @@
     const logoutBtn = document.getElementById('admin-logout-btn');
     let eventsMap = {};
 
+    let token = '';
+
     // On Load: Check if token exists
     document.addEventListener('DOMContentLoaded', async () => {
-      const token = localStorage.getItem('adminToken');
+      token = localStorage.getItem('adminToken');
       if (!token) {
         window.location.href = '/admin';
         return;
       }
+
+
 
       await loadEventsMap(token);
       loadApplications(token);
@@ -254,15 +262,65 @@
             const dateCell = document.createElement('td');
             dateCell.textContent = app.submittedAt ? new Date(app.submittedAt).toLocaleString() : 'N/A';
             row.appendChild(dateCell);
+
+            // Status Cell
+            const statusCell = document.createElement('td');
+            const appStatus = app.status || 'Pending';
+            const statusSpan = document.createElement('span');
+            statusSpan.textContent = appStatus;
+            statusSpan.className = `badge ${appStatus === 'Shortlisted' ? 'badge-green' : 'badge-purple'}`;
+            statusCell.appendChild(statusSpan);
+            row.appendChild(statusCell);
+
+            // Actions Cell
+            const actionsCell = document.createElement('td');
+            if (appStatus !== 'Shortlisted') {
+              const shortlistBtn = document.createElement('button');
+              shortlistBtn.textContent = 'Shortlist 🏆';
+              shortlistBtn.type = 'button';
+              shortlistBtn.style.padding = '4px 8px';
+              shortlistBtn.style.fontSize = '12px';
+              shortlistBtn.style.cursor = 'pointer';
+              shortlistBtn.addEventListener('click', async () => {
+                if (!confirm(`Are you sure you want to shortlist ${app.fullName || 'this player'}?`)) {
+                  return;
+                }
+                
+                try {
+                  const res = await fetch(`/api/admin/applications/${app._id}/shortlist`, {
+                    method: 'PUT',
+                    headers: {
+                      'Authorization': `Bearer ${token}`
+                    }
+                  });
+
+                  if (res.ok) {
+                    alert('Player shortlisted successfully!');
+                    loadApplications(token);
+                  } else {
+                    const errData = await res.json();
+                    alert(`Error: ${errData.message || 'Failed to shortlist'}`);
+                  }
+                } catch (err) {
+                  console.error(err);
+                  alert('Network error occurred.');
+                }
+              });
+              actionsCell.appendChild(shortlistBtn);
+            } else {
+              actionsCell.textContent = 'No actions';
+              actionsCell.style.color = '#64748b';
+            }
+            row.appendChild(actionsCell);
             
             appTableBody.appendChild(row);
           });
         } else {
-          appTableBody.innerHTML = '<tr><td colspan="20">No applications received yet.</td></tr>';
+          appTableBody.innerHTML = '<tr><td colspan="22">No applications received yet.</td></tr>';
         }
       } catch (error) {
         console.error('Failed to load applications:', error);
-        appTableBody.innerHTML = '<tr><td colspan="20">Error loading application database.</td></tr>';
+        appTableBody.innerHTML = '<tr><td colspan="22">Error loading application database.</td></tr>';
       }
     }
   </script>

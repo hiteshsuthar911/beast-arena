@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard - Beast Arena Gaming Network</title>
-  <link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/admin.css">
   <script src="/nav.js" defer></script>
 </head>
 <body>
@@ -75,7 +75,7 @@
       <h2>System Diagnostics & Statistics</h2>
       <p>Welcome, Administrator. Select an option from the navigation bar above or review the system counters below.</p>
 
-      <fieldset>
+      <fieldset style="margin-bottom: 1.5rem;">
         <legend>Database & Platform Status</legend>
         <ul>
           <li><strong>Database Status:</strong> <span id="status-db">Checking...</span></li>
@@ -84,6 +84,18 @@
           <li><strong>Total Created Tournaments:</strong> <span id="status-events">Checking...</span></li>
         </ul>
         <p><button id="refresh-status-btn" type="button">Refresh Diagnostics</button></p>
+      </fieldset>
+
+      <!-- System Maintenance Panel -->
+      <fieldset style="border-color: #dc2626; margin-bottom: 1.5rem;">
+        <legend style="color: #dc2626; font-weight: bold;">System Maintenance & Danger Zone</legend>
+        <p style="font-size: 0.9rem; color: #4b5563; margin-top: 0;">Resetting all details will permanently delete all player user accounts, tournament application records, and created events from the platform database.</p>
+        <p>
+          <button id="reset-db-btn" type="button" style="background-color: #dc2626; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem;">
+            Reset All Details & Clear Database ⚠️
+          </button>
+        </p>
+        <p id="reset-status-msg" style="font-weight: bold; margin-top: 0.5rem;"></p>
       </fieldset>
     </section>
 
@@ -225,6 +237,53 @@
     // Handle Log Out
     logoutBtn.addEventListener('click', () => {
       showLogin();
+    });
+
+    // Handle Reset Database
+    const resetDbBtn = document.getElementById('reset-db-btn');
+    const resetStatusMsg = document.getElementById('reset-status-msg');
+
+    resetDbBtn.addEventListener('click', async () => {
+      const confirmFirst = confirm("⚠️ DANGER ZONE ⚠️\n\nAre you absolutely sure you want to RESET the entire platform database?\n\nThis will permanently delete:\n- All Player User Accounts\n- All Tournament Events\n- All Player Application Forms\n\nThis action CANNOT be undone.");
+      if (!confirmFirst) return;
+
+      const confirmSecond = confirm("FINAL CONFIRMATION:\n\nAre you 100% sure? Type OK to proceed with complete deletion.");
+      if (!confirmSecond) return;
+
+      resetStatusMsg.textContent = 'Resetting database records...';
+      resetStatusMsg.style.color = '#dc2626';
+      resetDbBtn.disabled = true;
+
+      try {
+        const token = localStorage.getItem('adminToken');
+        const response = await fetch('/api/admin/reset-database', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success) {
+          resetStatusMsg.textContent = 'SUCCESS: ' + data.message;
+          resetStatusMsg.style.color = '#16a34a';
+          loadStatus();
+          setTimeout(() => {
+            resetStatusMsg.textContent = '';
+            resetDbBtn.disabled = false;
+          }, 3000);
+        } else {
+          resetStatusMsg.textContent = 'Error: ' + (data.message || 'Failed to reset database.');
+          resetStatusMsg.style.color = '#dc2626';
+          resetDbBtn.disabled = false;
+        }
+      } catch (error) {
+        console.error('Reset database error:', error);
+        resetStatusMsg.textContent = 'Error: Failed to connect to server.';
+        resetStatusMsg.style.color = '#dc2626';
+        resetDbBtn.disabled = false;
+      }
     });
 
     // Handle Refresh Diagnostics

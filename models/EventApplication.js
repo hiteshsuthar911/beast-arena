@@ -20,6 +20,7 @@ const EventApplicationSchema = new mongoose.Schema({
   secondaryGames: { type: [String] },
   referral: { type: String },
   agreedToTerms: { type: Boolean },
+  status: { type: String, enum: ['Pending', 'Shortlisted', 'Rejected'], default: 'Pending' },
   submittedAt: { type: Date, default: Date.now }
 });
 

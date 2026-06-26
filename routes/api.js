@@ -18,36 +18,46 @@ const cleanEnvVar = (val) => {
   return val.toString().replace(/^["']|["']$/g, '').trim();
 };
 
-// Helper to send OTP email or fallback to console log
-async function sendOtpEmail(toEmail, otp) {
+// Helper to send email or fallback to console log
+async function sendEmail({ to, subject, html, text, fromName = 'Beast Arena' }) {
   const host = cleanEnvVar(process.env.SMTP_HOST);
   const port = cleanEnvVar(process.env.SMTP_PORT) || 587;
   const user = cleanEnvVar(process.env.SMTP_USER);
   const pass = cleanEnvVar(process.env.SMTP_PASS);
   const resendApiKey = cleanEnvVar(process.env.RESEND_API_KEY);
 
-  const cleanToEmail = cleanEnvVar(toEmail);
+  let cleanToEmail = cleanEnvVar(to);
+  const ownerEmail = cleanEnvVar(process.env.ADMIN_EMAIL) || cleanEnvVar(process.env.SMTP_USER) || 'thebeastarenaa@gmail.com';
+  const resendFromEmail = cleanEnvVar(process.env.RESEND_FROM_EMAIL) || 'onboarding@resend.dev';
+  const isSandbox = resendFromEmail.includes('onboarding@resend.dev');
+  const disableRedirect = cleanEnvVar(process.env.DISABLE_SANDBOX_REDIRECT) === 'true';
+  let finalSubject = subject;
+  let finalHtml = html;
+  let finalText = text;
+
+  // Sandbox Email Redirection:
+  // If we are using Resend API in sandbox mode (using onboarding@resend.dev) and sending to an email other than the ownerEmail,
+  // we redirect it to the ownerEmail to prevent Resend 403 sandbox restrictions/bounces (unless disabled).
+  if (resendApiKey && isSandbox && !disableRedirect && cleanToEmail.toLowerCase() !== ownerEmail.toLowerCase()) {
+    console.log(`[Email Sandbox] Intercepted email to ${cleanToEmail}. Redirecting to sandbox owner: ${ownerEmail}`);
+    finalSubject = `[Sandbox Redirect: to ${cleanToEmail}] ${subject}`;
+    if (finalText) {
+      finalText = `[This email was redirected from its original destination: ${cleanToEmail}]\n\n` + finalText;
+    }
+    if (finalHtml) {
+      finalHtml = `<div style="background: #fffbeb; border: 1px solid #fef3c7; color: #b45309; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-family: sans-serif; font-size: 14px;"><strong>Sandbox Redirect Mode:</strong> This notification was originally sent to <strong>${cleanToEmail}</strong> but was redirected to your testing address to prevent Resend sandbox delivery failure.</div>` + finalHtml;
+    }
+    cleanToEmail = ownerEmail;
+  }
 
   console.log(`\n==================================================`);
-  console.log(`                 BEAST ARENA OTP`);
+  console.log(`                 BEAST ARENA EMAIL`);
   console.log(`==================================================`);
   console.log(`To: ${cleanToEmail}`);
-  console.log(`OTP Code: ${otp}`);
-  console.log(`Expires in: 5 minutes`);
+  console.log(`Subject: ${finalSubject}`);
+  console.log(`--------------------------------------------------`);
+  console.log(finalText || finalHtml.replace(/<[^>]*>/g, ''));
   console.log(`==================================================\n`);
-
-  const subject = `[Beast Arena] Admin OTP Verification: ${otp}`;
-  const textBody = `Hello,\n\nYour 6-digit verification code to access the Beast Arena Admin Portal is: ${otp}\n\nThis code will expire in 5 minutes.\n\nBest regards,\nBeast Arena Security Team`;
-  const htmlBody = `
-    <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e9ecef; border-radius: 8px;">
-      <h2 style="color: #4f46e5; margin-top: 0;">Beast Arena Security</h2>
-      <p>Please use the following 6-digit verification code to access the Admin Portal:</p>
-      <div style="background: #f1f5f9; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 4px; border-radius: 6px; margin: 20px 0; color: #0f172a;">
-        ${otp}
-      </div>
-      <p style="font-size: 13px; color: #64748b; margin-bottom: 0;">This code is valid for 5 minutes. If you did not request this code, please secure your account immediately.</p>
-    </div>
-  `;
 
   // 1. Try Resend API (HTTPS Port 443 - works everywhere on Railway)
   if (resendApiKey) {
@@ -60,10 +70,11 @@ async function sendOtpEmail(toEmail, otp) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: 'Beast Arena Security <onboarding@resend.dev>',
+          from: `${fromName} <${resendFromEmail}>`,
           to: cleanToEmail,
-          subject: subject,
-          html: htmlBody
+          subject: finalSubject,
+          html: finalHtml,
+          text: finalText
         })
       });
 
@@ -83,7 +94,7 @@ async function sendOtpEmail(toEmail, otp) {
 
   // 2. Fallback to standard SMTP
   if (!user || !pass) {
-    console.log(`[Email Service] SMTP credentials missing and Resend API not configured. OTP sent only to console.`);
+    console.log(`[Email Service] SMTP credentials missing and Resend API not configured. Email logged to console only.`);
     return { success: true, loggedToConsole: true };
   }
 
@@ -98,11 +109,11 @@ async function sendOtpEmail(toEmail, otp) {
     console.log(`[Email Service] Configured SMTP transporter: ${host || 'smtp.gmail.com'}:${port}`);
 
     const info = await transporter.sendMail({
-      from: `"Beast Arena Security" <${user}>`,
+      from: `"${fromName}" <${user}>`,
       to: cleanToEmail,
-      subject: subject,
-      text: textBody,
-      html: htmlBody
+      subject: finalSubject,
+      text: finalText,
+      html: finalHtml
     });
 
     console.log(`[Email Service] Email sent successfully: ${info.messageId}`);
@@ -112,6 +123,31 @@ async function sendOtpEmail(toEmail, otp) {
     return { success: false, error: error.message };
   }
 }
+
+// Keep compatibility with admin OTP code
+async function sendOtpEmail(toEmail, otp) {
+  const subject = `[Beast Arena] Admin OTP Verification: ${otp}`;
+  const textBody = `Hello,\n\nYour 6-digit verification code to access the Beast Arena Admin Portal is: ${otp}\n\nThis code will expire in 5 minutes.\n\nBest regards,\nBeast Arena Security Team`;
+  const htmlBody = `
+    <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e9ecef; border-radius: 8px;">
+      <h2 style="color: #4f46e5; margin-top: 0;">Beast Arena Security</h2>
+      <p>Please use the following 6-digit verification code to access the Admin Portal:</p>
+      <div style="background: #f1f5f9; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 4px; border-radius: 6px; margin: 20px 0; color: #0f172a;">
+        ${otp}
+      </div>
+      <p style="font-size: 13px; color: #64748b; margin-bottom: 0;">This code is valid for 5 minutes. If you did not request this code, please secure your account immediately.</p>
+    </div>
+  `;
+  return sendEmail({
+    to: toEmail,
+    subject: subject,
+    text: textBody,
+    html: htmlBody,
+    fromName: 'Beast Arena Security'
+  });
+}
+
+
 
 // Helper to check if MongoDB is connected
 const isConnected = () => mongoose.connection.readyState === 1;
@@ -124,11 +160,12 @@ const allRegistrationFields = [
 ];
 
 // Fallback in-memory database
-const mockDb = {
+const mockDb = global.mockDb || {
   users: [],
   applications: [],
   events: []
 };
+global.mockDb = mockDb;
 
 // OAuth2 Configs
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
@@ -328,13 +365,17 @@ router.post('/auth/login-register', async (req, res) => {
           return res.status(401).json({ success: false, message: 'Incorrect password.' });
         }
       } else {
-        user = new User({ email, password });
+        // Register new user directly
+        user = new User({
+          email,
+          password
+        });
         await user.save();
         const token = generateToken(user.email);
-        return res.status(201).json({ success: true, token, isNew: true, username: email.split('@')[0], message: 'Account registered and logged in successfully!', user: { email: user.email } });
+        return res.status(201).json({ success: true, token, isNew: true, username: email.split('@')[0], message: 'Account registered successfully!' });
       }
     } else {
-      const user = mockDb.users.find(u => u.email === email);
+      let user = mockDb.users.find(u => u.email === email);
       if (user) {
         if (user.password === password) {
           const token = generateToken(user.email);
@@ -343,10 +384,14 @@ router.post('/auth/login-register', async (req, res) => {
           return res.status(401).json({ success: false, message: 'Incorrect password.' });
         }
       } else {
-        const newUser = { email, password, createdAt: new Date() };
+        const newUser = {
+          email,
+          password,
+          createdAt: new Date()
+        };
         mockDb.users.push(newUser);
         const token = generateToken(newUser.email);
-        return res.status(201).json({ success: true, token, isNew: true, username: email.split('@')[0], message: 'Account registered and logged in successfully! (In-memory DB fallback)', user: { email: newUser.email } });
+        return res.status(201).json({ success: true, token, isNew: true, username: email.split('@')[0], message: 'Account registered successfully! (In-memory DB fallback)' });
       }
     }
   } catch (error) {
@@ -725,6 +770,61 @@ router.get('/admin/applications', verifyAdminToken, async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 8b. Shortlist Player Application Endpoint
+router.put('/admin/applications/:id/shortlist', verifyAdminToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    if (isConnected()) {
+      const application = await EventApplication.findById(id);
+      if (!application) {
+        return res.status(404).json({ success: false, message: 'Application not found.' });
+      }
+
+      application.status = 'Shortlisted';
+      await application.save();
+
+      return res.json({ success: true, message: 'Application shortlisted successfully!', application });
+    } else {
+      const application = mockDb.applications.find(app => app._id === id);
+      if (!application) {
+        return res.status(404).json({ success: false, message: 'Application not found.' });
+      }
+
+      application.status = 'Shortlisted';
+
+      return res.json({ success: true, message: 'Application shortlisted successfully! (In-memory DB fallback)', application });
+    }
+  } catch (error) {
+    console.error('Shortlist application error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 8c. Danger Zone: Reset Database Endpoint
+router.post('/admin/reset-database', verifyAdminToken, async (req, res) => {
+  try {
+    if (isConnected()) {
+      await Promise.all([
+        User.deleteMany({}),
+        Event.deleteMany({}),
+        EventApplication.deleteMany({})
+      ]);
+      console.log('[Danger Zone] MongoDB database cleared successfully!');
+      return res.json({ success: true, message: 'MongoDB database cleared successfully!' });
+    } else {
+      mockDb.users = [];
+      mockDb.applications = [];
+      mockDb.events = [];
+      console.log('[Danger Zone] In-memory database cleared successfully!');
+      return res.json({ success: true, message: 'In-memory database cleared successfully! (Fallback)' });
+    }
+  } catch (error) {
+    console.error('Reset database error:', error);
+    res.status(500).json({ success: false, message: 'Failed to reset database.', error: error.message });
   }
 });
 

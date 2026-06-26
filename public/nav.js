@@ -2,6 +2,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const header = document.querySelector('header');
   if (!header) return;
 
+  const handleScroll = () => {
+    if (window.scrollY > 20) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+  };
+  window.addEventListener('scroll', handleScroll);
+  handleScroll();
+
   const desktopNav = header.querySelector('nav');
   if (!desktopNav) return;
 
