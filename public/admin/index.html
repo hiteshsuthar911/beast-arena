@@ -157,8 +157,13 @@
         if (response.ok && data.success) {
           if (data.otpRequired) {
             currentTransactionId = data.transactionId;
-            loginMessage.textContent = 'OTP sent! Please check your email or server console.';
-            loginMessage.style.color = '#16a34a';
+            if (!data.smtpConfigured) {
+              loginMessage.innerHTML = '⚠️ <strong>Warning:</strong> Admin SMTP credentials are not configured on the live server! The generated OTP has been printed only to the server log console. Check your Railway logs to find it, or add <code>SMTP_USER</code> and <code>SMTP_PASS</code> in Railway variables.';
+              loginMessage.style.color = '#d97706'; // Amber warning color
+            } else {
+              loginMessage.textContent = 'OTP sent! Please check your email inbox.';
+              loginMessage.style.color = '#16a34a'; // Green success color
+            }
             loginForm.setAttribute('hidden', '');
             otpForm.removeAttribute('hidden');
             document.getElementById('admin-otp').focus();

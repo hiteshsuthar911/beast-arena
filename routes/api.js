@@ -483,11 +483,14 @@ router.post('/admin/login', async (req, res) => {
     // Trigger sending the email in the background (does not block HTTP response)
     sendOtpEmail(adminEmail, otp);
 
+    const hasSmtp = cleanEnvVar(process.env.SMTP_USER) && cleanEnvVar(process.env.SMTP_PASS);
+
     return res.json({
       success: true,
       otpRequired: true,
       transactionId,
-      message: 'Credentials valid. OTP sent to administrator email.'
+      smtpConfigured: !!hasSmtp,
+      message: hasSmtp ? 'Credentials valid. OTP sent to administrator email.' : 'Credentials valid. SMTP config missing.'
     });
   } else {
     return res.status(401).json({ success: false, message: 'Invalid admin credentials.' });
