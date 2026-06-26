@@ -32,6 +32,7 @@ const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const REDIRECT_URI_HOST = process.env.REDIRECT_URI_HOST || 'http://localhost:3005';
 
 // Helper to handle player creation/sign in for OAuth2
+// Returns { token, isNew, username } so the frontend can show correct welcome message
 const handleOauthLoginRegister = async (email, username) => {
   const generateToken = (userEmail) => {
     const payload = `${userEmail}:${Date.now()}`;
@@ -40,20 +41,24 @@ const handleOauthLoginRegister = async (email, username) => {
 
   if (isConnected()) {
     let user = await User.findOne({ email });
+    let isNew = false;
     if (!user) {
       const randomPassword = 'oauth_' + Math.random().toString(36).substring(2);
       user = new User({ email, password: randomPassword });
       await user.save();
+      isNew = true;
     }
-    return generateToken(user.email);
+    return { token: generateToken(user.email), isNew, username: username || email.split('@')[0] };
   } else {
     let user = mockDb.users.find(u => u.email === email);
+    let isNew = false;
     if (!user) {
       const randomPassword = 'oauth_' + Math.random().toString(36).substring(2);
       user = { email, password: randomPassword, createdAt: new Date() };
       mockDb.users.push(user);
+      isNew = true;
     }
-    return generateToken(user.email);
+    return { token: generateToken(user.email), isNew, username: username || email.split('@')[0] };
   }
 };
 
@@ -117,8 +122,8 @@ router.get('/auth/discord/callback', async (req, res) => {
       }
     }
 
-    const token = await handleOauthLoginRegister(email, username);
-    res.redirect(`/callback?token=${token}`);
+    const result = await handleOauthLoginRegister(email, username);
+    res.redirect(`/callback?token=${result.token}&isNew=${result.isNew}&username=${encodeURIComponent(result.username)}&source=discord`);
   } catch (error) {
     console.error('Discord callback error:', error);
     res.redirect(`/callback?error=${encodeURIComponent(error.message)}`);
@@ -185,8 +190,8 @@ router.get('/auth/google/callback', async (req, res) => {
       }
     }
 
-    const token = await handleOauthLoginRegister(email, username);
-    res.redirect(`/callback?token=${token}`);
+    const result = await handleOauthLoginRegister(email, username);
+    res.redirect(`/callback?token=${result.token}&isNew=${result.isNew}&username=${encodeURIComponent(result.username)}&source=google`);
   } catch (error) {
     console.error('Google callback error:', error);
     res.redirect(`/callback?error=${encodeURIComponent(error.message)}`);
@@ -212,7 +217,7 @@ router.post('/auth/login-register', async (req, res) => {
       if (user) {
         if (user.password === password) {
           const token = generateToken(user.email);
-          return res.json({ success: true, token, message: 'Logged in successfully!', user: { email: user.email } });
+          return res.json({ success: true, token, isNew: false, username: email.split('@')[0], message: 'Logged in successfully!', user: { email: user.email } });
         } else {
           return res.status(401).json({ success: false, message: 'Incorrect password.' });
         }
@@ -220,14 +225,14 @@ router.post('/auth/login-register', async (req, res) => {
         user = new User({ email, password });
         await user.save();
         const token = generateToken(user.email);
-        return res.status(201).json({ success: true, token, message: 'Account registered and logged in successfully!', user: { email: user.email } });
+        return res.status(201).json({ success: true, token, isNew: true, username: email.split('@')[0], message: 'Account registered and logged in successfully!', user: { email: user.email } });
       }
     } else {
       const user = mockDb.users.find(u => u.email === email);
       if (user) {
         if (user.password === password) {
           const token = generateToken(user.email);
-          return res.json({ success: true, token, message: 'Logged in successfully! (In-memory DB fallback)', user: { email: user.email } });
+          return res.json({ success: true, token, isNew: false, username: email.split('@')[0], message: 'Logged in successfully! (In-memory DB fallback)', user: { email: user.email } });
         } else {
           return res.status(401).json({ success: false, message: 'Incorrect password.' });
         }
@@ -235,7 +240,7 @@ router.post('/auth/login-register', async (req, res) => {
         const newUser = { email, password, createdAt: new Date() };
         mockDb.users.push(newUser);
         const token = generateToken(newUser.email);
-        return res.status(201).json({ success: true, token, message: 'Account registered and logged in successfully! (In-memory DB fallback)', user: { email: newUser.email } });
+        return res.status(201).json({ success: true, token, isNew: true, username: email.split('@')[0], message: 'Account registered and logged in successfully! (In-memory DB fallback)', user: { email: newUser.email } });
       }
     }
   } catch (error) {

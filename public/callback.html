@@ -18,6 +18,9 @@
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
       const error = urlParams.get('error');
+      const isNew = urlParams.get('isNew') === 'true';
+      const username = urlParams.get('username') ? decodeURIComponent(urlParams.get('username')) : null;
+      const source = urlParams.get('source') || 'discord';
 
       const statusMsg = document.getElementById('status-msg');
 
@@ -29,11 +32,13 @@
         }, 3000);
       } else if (token) {
         localStorage.setItem('playerToken', token);
-        statusMsg.textContent = 'Login successful! Redirecting to portal...';
+        // Store welcome info for the homepage popup
+        sessionStorage.setItem('welcomeInfo', JSON.stringify({ isNew, username, source }));
+        statusMsg.textContent = 'Login successful! Redirecting...';
         statusMsg.style.color = '#16a34a';
         setTimeout(() => {
           window.location.href = '/';
-        }, 1000);
+        }, 800);
       } else {
         statusMsg.textContent = 'Error: No authorization token received. Redirecting...';
         statusMsg.style.color = '#dc2626';
