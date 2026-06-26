@@ -1,11 +1,69 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const Event = require('../models/Event');
 const EventApplication = require('../models/EventApplication');
 const { verifyAdminToken, verifyPlayerToken } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Store temporary OTP states in memory
+const tempOtps = {};
+
+// Helper to send OTP email or fallback to console log
+async function sendOtpEmail(toEmail, otp) {
+  console.log(`\n==================================================`);
+  console.log(`                 BEAST ARENA OTP`);
+  console.log(`==================================================`);
+  console.log(`To: ${toEmail}`);
+  console.log(`OTP Code: ${otp}`);
+  console.log(`Expires in: 5 minutes`);
+  console.log(`==================================================\n`);
+
+  const host = process.env.SMTP_HOST;
+  const port = process.env.SMTP_PORT || 587;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  if (!host || !user || !pass) {
+    console.log(`[Email Service] SMTP configuration missing in env. OTP sent only to console.`);
+    return { success: true, loggedToConsole: true };
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host,
+      port: parseInt(port, 10),
+      secure: port === '465',
+      auth: { user, pass }
+    });
+
+    const info = await transporter.sendMail({
+      from: `"Beast Arena Security" <${user}>`,
+      to: toEmail,
+      subject: `[Beast Arena] Admin OTP Verification: ${otp}`,
+      text: `Hello,\n\nYour 6-digit verification code to access the Beast Arena Admin Portal is: ${otp}\n\nThis code will expire in 5 minutes.\n\nBest regards,\nBeast Arena Security Team`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e9ecef; border-radius: 8px;">
+          <h2 style="color: #4f46e5; margin-top: 0;">Beast Arena Security</h2>
+          <p>Please use the following 6-digit verification code to access the Admin Portal:</p>
+          <div style="background: #f1f5f9; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 4px; border-radius: 6px; margin: 20px 0; color: #0f172a;">
+            ${otp}
+          </div>
+          <p style="font-size: 13px; color: #64748b; margin-bottom: 0;">This code is valid for 5 minutes. If you did not request this code, please secure your account immediately.</p>
+        </div>
+      `
+    });
+
+    console.log(`[Email Service] Email sent successfully: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error(`[Email Service] Failed to send email via SMTP:`, error);
+    return { success: false, error: error.message };
+  }
+}
 
 // Helper to check if MongoDB is connected
 const isConnected = () => mongoose.connection.readyState === 1;
@@ -382,7 +440,7 @@ router.get('/status', async (req, res) => {
 });
 
 // 4. Admin Auth Login API
-router.post('/admin/login', (req, res) => {
+router.post('/admin/login', async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -390,12 +448,65 @@ router.post('/admin/login', (req, res) => {
   }
 
   if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
-    const tokenPayload = `${username}:${Date.now()}`;
-    const token = Buffer.from(tokenPayload).toString('base64');
-    return res.json({ success: true, token, message: 'Admin authenticated successfully!' });
+    // Generate a 6-digit random numeric OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Generate a secure transaction ID
+    const transactionId = crypto.randomBytes(16).toString('hex');
+    
+    // Save in cache (valid for 5 minutes)
+    tempOtps[transactionId] = {
+      username,
+      otp,
+      expiresAt: Date.now() + 5 * 60 * 1000
+    };
+
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@beast-arena.com';
+
+    // Trigger sending the email
+    await sendOtpEmail(adminEmail, otp);
+
+    return res.json({
+      success: true,
+      otpRequired: true,
+      transactionId,
+      message: 'Credentials valid. OTP sent to administrator email.'
+    });
   } else {
     return res.status(401).json({ success: false, message: 'Invalid admin credentials.' });
   }
+});
+
+// 4b. Admin verify OTP API
+router.post('/admin/verify-otp', (req, res) => {
+  const { transactionId, otp } = req.body;
+
+  if (!transactionId || !otp) {
+    return res.status(400).json({ success: false, message: 'Transaction ID and OTP are required.' });
+  }
+
+  const cached = tempOtps[transactionId];
+  if (!cached) {
+    return res.status(400).json({ success: false, message: 'Invalid or expired transaction.' });
+  }
+
+  if (Date.now() > cached.expiresAt) {
+    delete tempOtps[transactionId];
+    return res.status(400).json({ success: false, message: 'OTP expired. Please log in again.' });
+  }
+
+  if (cached.otp !== otp) {
+    return res.status(400).json({ success: false, message: 'Invalid OTP code.' });
+  }
+
+  // OTP is correct! Generate the final admin token
+  const tokenPayload = `${cached.username}:${Date.now()}`;
+  const token = Buffer.from(tokenPayload).toString('base64');
+
+  // Clean up
+  delete tempOtps[transactionId];
+
+  return res.json({ success: true, token, message: 'Admin authenticated successfully!' });
 });
 
 // 5. Public API to fetch active tournaments for players (Filters out manually closed or expired events)

@@ -50,7 +50,24 @@
           </p>
         </fieldset>
       </form>
-      <p id="admin-login-message"></p>
+
+      <!-- OTP Form (Hidden by default) -->
+      <form id="admin-otp-form" hidden>
+        <fieldset>
+          <legend>OTP Verification Required</legend>
+          <p style="font-size: 0.9rem; color: #475569; margin: 0 0 1rem;">A 6-digit verification code has been generated and sent to the administrator's email.</p>
+          <p>
+            <label for="admin-otp">Enter OTP Code:</label><br>
+            <input type="text" id="admin-otp" required placeholder="123456" pattern="\d{6}" maxlength="6" style="letter-spacing: 0.2em; text-align: center; font-size: 1.1rem; font-weight: bold; max-width: 160px; font-family: monospace; margin-top: 0.25rem;">
+          </p>
+          <p style="margin-top: 1rem;">
+            <button type="submit">Verify & Login</button>
+            <button type="button" id="cancel-otp-btn" style="background:#64748b; margin-left: 0.5rem;">Cancel</button>
+          </p>
+        </fieldset>
+      </form>
+
+      <p id="admin-login-message" style="font-weight: 600; margin-top: 1rem;"></p>
     </section>
 
     <!-- 2. Admin Secure Dashboard Home View (Hidden by default) -->
@@ -82,9 +99,13 @@
     const dashboardSection = document.getElementById('admin-dashboard-section');
     const adminNav = document.getElementById('admin-nav');
     const loginForm = document.getElementById('admin-login-form');
+    const otpForm = document.getElementById('admin-otp-form');
+    const cancelOtpBtn = document.getElementById('cancel-otp-btn');
     const loginMessage = document.getElementById('admin-login-message');
     const logoutBtn = document.getElementById('admin-logout-btn');
     const refreshStatusBtn = document.getElementById('refresh-status-btn');
+
+    let currentTransactionId = '';
 
     // On Load: Check if token exists
     document.addEventListener('DOMContentLoaded', () => {
@@ -101,6 +122,11 @@
       loginSection.removeAttribute('hidden');
       dashboardSection.setAttribute('hidden', '');
       adminNav.setAttribute('hidden', '');
+      
+      loginForm.removeAttribute('hidden');
+      otpForm.setAttribute('hidden', '');
+      loginMessage.textContent = '';
+      currentTransactionId = '';
     }
 
     function showDashboard() {
@@ -114,6 +140,7 @@
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       loginMessage.textContent = 'Authenticating credentials...';
+      loginMessage.style.color = '#4f46e5';
 
       const username = document.getElementById('admin-username').value;
       const password = document.getElementById('admin-password').value;
@@ -128,17 +155,66 @@
         const data = await response.json();
 
         if (response.ok && data.success) {
-          loginMessage.textContent = '';
-          localStorage.setItem('adminToken', data.token);
-          loginForm.reset();
-          showDashboard();
+          if (data.otpRequired) {
+            currentTransactionId = data.transactionId;
+            loginMessage.textContent = 'OTP sent! Please check your email or server console.';
+            loginMessage.style.color = '#16a34a';
+            loginForm.setAttribute('hidden', '');
+            otpForm.removeAttribute('hidden');
+            document.getElementById('admin-otp').focus();
+          } else {
+            loginMessage.textContent = '';
+            localStorage.setItem('adminToken', data.token);
+            loginForm.reset();
+            showDashboard();
+          }
         } else {
           loginMessage.textContent = `Error: ${data.message}`;
+          loginMessage.style.color = '#dc2626';
         }
       } catch (error) {
         console.error('Admin Auth Error:', error);
         loginMessage.textContent = 'Error: Failed to connect to authentication server.';
+        loginMessage.style.color = '#dc2626';
       }
+    });
+
+    // Handle Admin OTP verification
+    otpForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loginMessage.textContent = 'Verifying OTP code...';
+      loginMessage.style.color = '#4f46e5';
+
+      const otp = document.getElementById('admin-otp').value;
+
+      try {
+        const response = await fetch('/api/admin/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transactionId: currentTransactionId, otp })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          loginMessage.textContent = '';
+          localStorage.setItem('adminToken', data.token);
+          otpForm.reset();
+          loginForm.reset();
+          showDashboard();
+        } else {
+          loginMessage.textContent = `Error: ${data.message}`;
+          loginMessage.style.color = '#dc2626';
+        }
+      } catch (error) {
+        console.error('OTP Verification Error:', error);
+        loginMessage.textContent = 'Error: Failed to connect to verification server.';
+        loginMessage.style.color = '#dc2626';
+      }
+    });
+
+    cancelOtpBtn.addEventListener('click', () => {
+      showLogin();
     });
 
     // Handle Log Out
