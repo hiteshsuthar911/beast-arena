@@ -77,18 +77,33 @@ document.addEventListener('DOMContentLoaded', () => {
   header.appendChild(overlay);
 
   // 3. Register Overlay Toggle Listeners
-  toggleBtn.addEventListener('click', () => {
+  function openOverlay() {
     overlay.removeAttribute('hidden');
-  });
+    // Small delay so display kicks in before animation starts
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => overlay.classList.add('open'));
+    });
+  }
 
-  closeBtn.addEventListener('click', () => {
-    overlay.setAttribute('hidden', '');
-  });
+  function closeOverlay() {
+    overlay.classList.remove('open');
+    overlay.classList.add('closing');
+    overlay.addEventListener('animationend', () => {
+      overlay.setAttribute('hidden', '');
+      overlay.classList.remove('closing');
+    }, { once: true });
+  }
+
+  toggleBtn.addEventListener('click', openOverlay);
+  closeBtn.addEventListener('click', closeOverlay);
 
   // Hide overlay if any link is clicked
   overlayNav.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      overlay.setAttribute('hidden', '');
-    });
+    link.addEventListener('click', closeOverlay);
+  });
+
+  // Close on backdrop tap (clicking outside the nav card)
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeOverlay();
   });
 });
