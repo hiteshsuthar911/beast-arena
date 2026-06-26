@@ -12,20 +12,28 @@ const router = express.Router();
 // Store temporary OTP states in memory
 const tempOtps = {};
 
+// Helper to clean environment variables (removes accidental double/single quotes)
+const cleanEnvVar = (val) => {
+  if (!val) return '';
+  return val.toString().replace(/^["']|["']$/g, '').trim();
+};
+
 // Helper to send OTP email or fallback to console log
 async function sendOtpEmail(toEmail, otp) {
+  const host = cleanEnvVar(process.env.SMTP_HOST);
+  const port = cleanEnvVar(process.env.SMTP_PORT) || 587;
+  const user = cleanEnvVar(process.env.SMTP_USER);
+  const pass = cleanEnvVar(process.env.SMTP_PASS);
+
+  const cleanToEmail = cleanEnvVar(toEmail);
+
   console.log(`\n==================================================`);
   console.log(`                 BEAST ARENA OTP`);
   console.log(`==================================================`);
-  console.log(`To: ${toEmail}`);
+  console.log(`To: ${cleanToEmail}`);
   console.log(`OTP Code: ${otp}`);
   console.log(`Expires in: 5 minutes`);
   console.log(`==================================================\n`);
-
-  const host = process.env.SMTP_HOST;
-  const port = process.env.SMTP_PORT || 587;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
 
   if (!user || !pass) {
     console.log(`[Email Service] SMTP credentials (SMTP_USER, SMTP_PASS) missing in env. OTP sent only to console.`);
@@ -470,7 +478,7 @@ router.post('/admin/login', async (req, res) => {
       expiresAt: Date.now() + 5 * 60 * 1000
     };
 
-    const adminEmail = process.env.ADMIN_EMAIL || 'thebeastarenaa@gmail.com';
+    const adminEmail = cleanEnvVar(process.env.ADMIN_EMAIL) || 'thebeastarenaa@gmail.com';
 
     // Trigger sending the email in the background (does not block HTTP response)
     sendOtpEmail(adminEmail, otp);
