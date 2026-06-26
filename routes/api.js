@@ -24,6 +24,7 @@ async function sendOtpEmail(toEmail, otp) {
   const port = cleanEnvVar(process.env.SMTP_PORT) || 587;
   const user = cleanEnvVar(process.env.SMTP_USER);
   const pass = cleanEnvVar(process.env.SMTP_PASS);
+  const resendApiKey = cleanEnvVar(process.env.RESEND_API_KEY);
 
   const cleanToEmail = cleanEnvVar(toEmail);
 
@@ -35,8 +36,54 @@ async function sendOtpEmail(toEmail, otp) {
   console.log(`Expires in: 5 minutes`);
   console.log(`==================================================\n`);
 
+  const subject = `[Beast Arena] Admin OTP Verification: ${otp}`;
+  const textBody = `Hello,\n\nYour 6-digit verification code to access the Beast Arena Admin Portal is: ${otp}\n\nThis code will expire in 5 minutes.\n\nBest regards,\nBeast Arena Security Team`;
+  const htmlBody = `
+    <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e9ecef; border-radius: 8px;">
+      <h2 style="color: #4f46e5; margin-top: 0;">Beast Arena Security</h2>
+      <p>Please use the following 6-digit verification code to access the Admin Portal:</p>
+      <div style="background: #f1f5f9; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 4px; border-radius: 6px; margin: 20px 0; color: #0f172a;">
+        ${otp}
+      </div>
+      <p style="font-size: 13px; color: #64748b; margin-bottom: 0;">This code is valid for 5 minutes. If you did not request this code, please secure your account immediately.</p>
+    </div>
+  `;
+
+  // 1. Try Resend API (HTTPS Port 443 - works everywhere on Railway)
+  if (resendApiKey) {
+    try {
+      console.log(`[Email Service] Attempting delivery via Resend API (HTTPS)...`);
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: 'Beast Arena Security <onboarding@resend.dev>',
+          to: cleanToEmail,
+          subject: subject,
+          html: htmlBody
+        })
+      });
+
+      const resData = await response.json();
+      if (response.ok) {
+        console.log(`[Email Service] Email sent successfully via Resend. ID: ${resData.id}`);
+        return { success: true, messageId: resData.id };
+      } else {
+        console.error(`[Email Service] Resend API error response:`, resData);
+        throw new Error(resData.message || 'Unknown Resend API error');
+      }
+    } catch (error) {
+      console.error(`[Email Service] Failed to send email via Resend API:`, error);
+      console.log(`[Email Service] Falling back to standard SMTP...`);
+    }
+  }
+
+  // 2. Fallback to standard SMTP
   if (!user || !pass) {
-    console.log(`[Email Service] SMTP credentials (SMTP_USER, SMTP_PASS) missing in env. OTP sent only to console.`);
+    console.log(`[Email Service] SMTP credentials missing and Resend API not configured. OTP sent only to console.`);
     return { success: true, loggedToConsole: true };
   }
 
@@ -52,19 +99,10 @@ async function sendOtpEmail(toEmail, otp) {
 
     const info = await transporter.sendMail({
       from: `"Beast Arena Security" <${user}>`,
-      to: toEmail,
-      subject: `[Beast Arena] Admin OTP Verification: ${otp}`,
-      text: `Hello,\n\nYour 6-digit verification code to access the Beast Arena Admin Portal is: ${otp}\n\nThis code will expire in 5 minutes.\n\nBest regards,\nBeast Arena Security Team`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e9ecef; border-radius: 8px;">
-          <h2 style="color: #4f46e5; margin-top: 0;">Beast Arena Security</h2>
-          <p>Please use the following 6-digit verification code to access the Admin Portal:</p>
-          <div style="background: #f1f5f9; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 4px; border-radius: 6px; margin: 20px 0; color: #0f172a;">
-            ${otp}
-          </div>
-          <p style="font-size: 13px; color: #64748b; margin-bottom: 0;">This code is valid for 5 minutes. If you did not request this code, please secure your account immediately.</p>
-        </div>
-      `
+      to: cleanToEmail,
+      subject: subject,
+      text: textBody,
+      html: htmlBody
     });
 
     console.log(`[Email Service] Email sent successfully: ${info.messageId}`);
