@@ -3,419 +3,143 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Beast Arena Gaming Network - Home</title>
-  <meta name="description" content="Beast Arena is the premier entertainment-driven esports hub hosting free-to-enter tournaments with brand-sponsored cash prizes.">
+  <title>Beast Arena - Home</title>
+  <meta name="description" content="Free-to-enter esports tournaments with brand-sponsored prizes.">
   <link rel="stylesheet" href="/index.css">
   <script src="/nav.js" defer></script>
-  <style>
-    /* ── Welcome Popup ───────────────────────────────────────── */
-    #welcome-popup {
-      position: fixed; inset: 0; z-index: 9999;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
-      animation: popupFadeIn 0.4s ease;
-    }
-    #welcome-popup.hide { animation: popupFadeOut 0.4s ease forwards; }
-    @keyframes popupFadeIn  { from{opacity:0} to{opacity:1} }
-    @keyframes popupFadeOut { from{opacity:1} to{opacity:0} }
-    .welcome-card {
-      background:#fff; border-radius:20px; padding:2.5rem 2.8rem;
-      max-width:420px; width:90%; text-align:center;
-      box-shadow:0 24px 60px rgba(0,0,0,0.22); position:relative;
-      animation:cardSlideIn 0.45s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    @keyframes cardSlideIn {
-      from{transform:translateY(40px) scale(0.9);opacity:0}
-      to  {transform:translateY(0)    scale(1);  opacity:1}
-    }
-    .welcome-emoji { font-size:3.5rem; line-height:1; margin-bottom:.6rem;
-      animation:emojiBounce 0.6s 0.3s cubic-bezier(0.34,1.56,0.64,1) both; }
-    @keyframes emojiBounce { from{transform:scale(0)} to{transform:scale(1)} }
-    .welcome-source-badge {
-      display:inline-flex; align-items:center; gap:6px;
-      font-size:.78rem; font-weight:600; padding:4px 12px;
-      border-radius:20px; margin-bottom:1rem; letter-spacing:.04em; text-transform:uppercase;
-    }
-    .welcome-source-badge.discord{background:#5865F2;color:#fff}
-    .welcome-source-badge.google {background:#EA4335;color:#fff}
-    .welcome-source-badge.email  {background:#111;   color:#fff}
-    .welcome-card h2  { font-size:1.5rem; font-weight:800; color:#111; margin:0 0 .4rem; }
-    .welcome-name     { font-size:1.05rem; color:#444; margin-bottom:.3rem; }
-    .welcome-sub      { font-size:.88rem; color:#888; margin-bottom:1.4rem; }
-    .welcome-close-btn {
-      background:#111; color:#fff; border:none;
-      padding:.65rem 2rem; border-radius:50px;
-      font-size:.95rem; font-weight:600; cursor:pointer; transition:background .2s;
-    }
-    .welcome-close-btn:hover { background:#333; }
-    .countdown-ring { position:absolute; top:14px; right:16px; width:36px; height:36px; }
-    .countdown-ring svg  { transform:rotate(-90deg); }
-    .countdown-ring circle { fill:none; stroke:#e0e0e0; stroke-width:3; }
-    .countdown-ring .progress {
-      stroke:#111; stroke-linecap:round;
-      stroke-dasharray:100; stroke-dashoffset:0; transition:stroke-dashoffset 1s linear;
-    }
-    .countdown-ring .count-text {
-      position:absolute; inset:0; display:flex;
-      align-items:center; justify-content:center;
-      font-size:.72rem; font-weight:700; color:#555;
-    }
-
-    /* ── Home Page Specific Styles ───────────────────────────── */
-    .hero-banner {
-      background: linear-gradient(135deg, #1e1b4b 0%, #4f46e5 60%, #818cf8 100%);
-      border-radius: 16px;
-      padding: 3rem 2.5rem;
-      color: #fff;
-      margin-bottom: 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-banner::before {
-      content: '🎮';
-      position: absolute;
-      right: 2rem; top: 50%;
-      transform: translateY(-50%);
-      font-size: 7rem;
-      opacity: 0.12;
-      line-height: 1;
-    }
-    .hero-banner h2 { color:#fff; font-size:2rem; margin:0 0 .75rem; }
-    .hero-banner p  { color:rgba(255,255,255,0.85); font-size:1.05rem; margin:0 0 1.5rem; max-width:520px; }
-    .hero-btns      { display:flex; gap:.75rem; flex-wrap:wrap; }
-    .btn-primary {
-      background:#fff; color:#4f46e5;
-      padding:.65rem 1.5rem; border-radius:8px;
-      font-weight:700; font-size:.95rem; text-decoration:none;
-      transition:all .2s; display:inline-block;
-    }
-    .btn-primary:hover { background:#f1f5f9; transform:translateY(-1px); }
-    .btn-outline {
-      background:transparent; color:#fff;
-      border:2px solid rgba(255,255,255,0.6);
-      padding:.6rem 1.5rem; border-radius:8px;
-      font-weight:600; font-size:.95rem; text-decoration:none;
-      transition:all .2s; display:inline-block;
-    }
-    .btn-outline:hover { background:rgba(255,255,255,0.1); }
-
-    /* Stats */
-    .stats-grid {
-      display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem;
-    }
-    .stat-card {
-      background:#fff; border:1px solid #e2e8f0; border-radius:12px;
-      padding:1.25rem; text-align:center;
-      box-shadow:0 1px 3px rgba(0,0,0,.05);
-      transition:transform .2s, box-shadow .2s;
-    }
-    .stat-card:hover { transform:translateY(-3px); box-shadow:0 6px 20px rgba(0,0,0,.08); }
-    .stat-icon  { font-size:2rem; margin-bottom:.4rem; }
-    .stat-value { font-size:1.8rem; font-weight:800; color:#4f46e5; line-height:1; }
-    .stat-label { font-size:.8rem; color:#64748b; margin-top:.25rem; font-weight:500; }
-
-    /* Games */
-    .games-grid {
-      display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;
-    }
-    .game-card {
-      border:1px solid #e2e8f0; border-radius:12px; padding:1.25rem;
-      text-align:center; transition:all .2s; background:#fff;
-      cursor:default;
-    }
-    .game-card:hover { border-color:#4f46e5; transform:translateY(-2px); box-shadow:0 8px 24px rgba(79,70,229,.1); }
-    .game-icon  { font-size:2.5rem; margin-bottom:.5rem; }
-    .game-name  { font-weight:700; font-size:.95rem; color:#0f172a; }
-    .game-badge {
-      display:inline-block; background:#f1f5f9; color:#475569;
-      font-size:.72rem; font-weight:600; padding:2px 8px;
-      border-radius:20px; margin-top:.4rem;
-    }
-    .game-badge.active { background:#dcfce7; color:#16a34a; }
-
-    /* How it works */
-    .steps-grid {
-      display:grid; grid-template-columns:repeat(4,1fr); gap:1rem;
-    }
-    .step-card {
-      text-align:center; padding:1rem .5rem;
-    }
-    .step-num {
-      width:40px; height:40px; border-radius:50%;
-      background:#4f46e5; color:#fff;
-      font-size:1rem; font-weight:800;
-      display:flex; align-items:center; justify-content:center;
-      margin:0 auto .75rem;
-    }
-    .step-title { font-weight:700; font-size:.9rem; color:#0f172a; margin:.5rem 0 .25rem; }
-    .step-desc  { font-size:.8rem; color:#64748b; line-height:1.4; }
-
-    /* Reviews */
-    .reviews-grid {
-      display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;
-    }
-    .review-card {
-      background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px;
-      padding:1.25rem; transition:box-shadow .2s;
-    }
-    .review-card:hover { box-shadow:0 6px 20px rgba(0,0,0,.08); }
-    .review-stars  { color:#f59e0b; font-size:1rem; margin-bottom:.5rem; }
-    .review-text   { font-size:.88rem; color:#334155; line-height:1.55; margin-bottom:.75rem; font-style:italic; }
-    .review-author { display:flex; align-items:center; gap:.6rem; }
-    .review-avatar { width:34px; height:34px; border-radius:50%; background:#4f46e5;
-      color:#fff; font-size:.85rem; font-weight:700;
-      display:flex; align-items:center; justify-content:center; }
-    .review-name   { font-weight:600; font-size:.85rem; color:#0f172a; }
-    .review-game   { font-size:.75rem; color:#64748b; }
-
-    /* Upcoming event CTA */
-    .cta-banner {
-      background:linear-gradient(135deg,#0f172a,#1e1b4b);
-      border-radius:16px; padding:2.5rem;
-      display:flex; align-items:center; justify-content:space-between;
-      gap:1.5rem; flex-wrap:wrap;
-    }
-    .cta-banner h3 { color:#fff; font-size:1.3rem; margin:0 0 .4rem; }
-    .cta-banner p  { color:rgba(255,255,255,.7); margin:0; font-size:.9rem; }
-    .cta-banner .btn-primary { flex-shrink:0; }
-
-    @media(max-width:640px) {
-      .hero-banner { padding:2rem 1.25rem; }
-      .hero-banner h2 { font-size:1.4rem; }
-      .stats-grid  { grid-template-columns:repeat(2,1fr); }
-      .games-grid  { grid-template-columns:repeat(2,1fr); }
-      .steps-grid  { grid-template-columns:repeat(2,1fr); }
-      .reviews-grid{ grid-template-columns:1fr; }
-      .cta-banner  { flex-direction:column; text-align:center; }
-    }
-  </style>
 </head>
 <body>
 
-  <!-- ── Welcome Popup ────────────────────────────────────────── -->
+  <!-- Welcome Popup -->
   <div id="welcome-popup" style="display:none;" role="dialog" aria-modal="true">
     <div class="welcome-card">
       <div class="countdown-ring">
-        <svg viewBox="0 0 36 36" width="36" height="36">
+        <svg viewBox="0 0 36 36" width="34" height="34">
           <circle cx="18" cy="18" r="15.9"/>
-          <circle class="progress" id="ring-progress" cx="18" cy="18" r="15.9"/>
+          <circle class="prog" id="ring-prog" cx="18" cy="18" r="15.9"/>
         </svg>
         <div class="count-text" id="ring-count">4</div>
       </div>
       <div class="welcome-emoji" id="popup-emoji">🎮</div>
-      <div class="welcome-source-badge email" id="popup-badge">Email</div>
+      <div class="welcome-badge email" id="popup-badge">Email</div>
       <h2 id="popup-title">Welcome!</h2>
-      <p class="welcome-name" id="popup-name"></p>
-      <p class="welcome-sub" id="popup-sub">Get ready to compete in the arena.</p>
-      <button class="welcome-close-btn" id="popup-close-btn">Let's Go! 🚀</button>
+      <p class="welcome-who" id="popup-who"></p>
+      <p class="welcome-sub" id="popup-sub">Get ready to compete.</p>
+      <button class="welcome-btn" id="popup-btn">Let's Go! 🚀</button>
     </div>
   </div>
 
   <header>
-    <h1>Beast Arena Gaming Network</h1>
-    <p><strong>Where Mass Entertainment Meets Esports</strong></p>
-    <nav>
-      <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/about">About Us</a></li>
-        <li><a href="/login">Player Portal (Login)</a></li>
-        <li><a href="/winners">Past Winners</a></li>
-        <li><a href="/register">Tournament Registration</a></li>
-        <li><a href="/profile">My Profile</a></li>
-        <li><button id="player-logout-btn" type="button">Log Out</button></li>
-      </ul>
-    </nav>
+    <div class="header-inner">
+      <h1>Beast Arena Gaming Network</h1>
+      <p><strong>Where Mass Entertainment Meets Esports</strong></p>
+      <nav>
+        <ul class="desktop-nav">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About Us</a></li>
+          <li><a href="/login">Player Portal</a></li>
+          <li><a href="/winners">Past Winners</a></li>
+          <li><a href="/register">Register</a></li>
+          <li><a href="/profile">My Profile</a></li>
+          <li><button id="player-logout-btn">Log Out</button></li>
+        </ul>
+        <button class="menu-toggle-btn" id="menu-open-btn">☰ Menu</button>
+      </nav>
+    </div>
   </header>
 
   <main>
-    <hr>
 
-    <!-- Hero Banner -->
-    <div class="hero-banner">
+    <!-- Hero -->
+    <div class="hero">
       <h2>Compete. Win. Dominate the Arena.</h2>
-      <p>Beast Arena hosts free-to-enter esports tournaments with brand-sponsored cash prizes. No entry fee — just raw skill and passion for gaming.</p>
+      <p>Free-to-enter tournaments with brand-sponsored cash prizes. No fees — just skill.</p>
       <div class="hero-btns">
-        <a href="/register" class="btn-primary">🏆 Register Now</a>
-        <a href="/winners" class="btn-outline">🎯 View Past Winners</a>
+        <a href="/register" class="btn btn-white">🏆 Register Now</a>
+        <a href="/winners"  class="btn btn-ghost">🎯 View Winners</a>
       </div>
     </div>
 
     <!-- Stats -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon">🎮</div>
-        <div class="stat-value">500+</div>
-        <div class="stat-label">Players Registered</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">🏆</div>
-        <div class="stat-value">24</div>
-        <div class="stat-label">Tournaments Hosted</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">💰</div>
-        <div class="stat-value">₹2L+</div>
-        <div class="stat-label">Prize Pool Distributed</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">⭐</div>
-        <div class="stat-value">4.9</div>
-        <div class="stat-label">Player Rating</div>
-      </div>
+    <div class="grid-4" style="margin-bottom:1.25rem;">
+      <div class="stat-card"><div class="stat-icon">🎮</div><div class="stat-value">500+</div><div class="stat-label">Players</div></div>
+      <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-value">24</div><div class="stat-label">Tournaments</div></div>
+      <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-value">₹2L+</div><div class="stat-label">Prizes Given</div></div>
+      <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-value">4.9</div><div class="stat-label">Player Rating</div></div>
     </div>
 
-    <!-- Featured Games -->
+    <!-- Games -->
     <section>
       <h2>🎯 Games We Host</h2>
-      <p>We run tournaments across the most popular competitive titles — with new games added every season.</p>
-      <div class="games-grid">
-        <div class="game-card">
-          <div class="game-icon">⛏️</div>
-          <div class="game-name">Minecraft</div>
-          <span class="game-badge active">Active</span>
-        </div>
-        <div class="game-card">
-          <div class="game-icon">🎯</div>
-          <div class="game-name">Valorant</div>
-          <span class="game-badge active">Active</span>
-        </div>
-        <div class="game-card">
-          <div class="game-icon">🔫</div>
-          <div class="game-name">BGMI</div>
-          <span class="game-badge active">Active</span>
-        </div>
-        <div class="game-card">
-          <div class="game-icon">🏟️</div>
-          <div class="game-name">Free Fire</div>
-          <span class="game-badge">Coming Soon</span>
-        </div>
-        <div class="game-card">
-          <div class="game-icon">⚔️</div>
-          <div class="game-name">COD Mobile</div>
-          <span class="game-badge">Coming Soon</span>
-        </div>
-        <div class="game-card">
-          <div class="game-icon">🧩</div>
-          <div class="game-name">More Games</div>
-          <span class="game-badge">Season 2</span>
-        </div>
+      <p>Tournaments across the most popular competitive titles — new games added every season.</p>
+      <div class="grid-3" style="margin-top:1rem;">
+        <div class="item-card"><div class="item-icon">⛏️</div><div class="item-title">Minecraft</div><div class="item-sub"><span class="badge badge-green">Active</span></div></div>
+        <div class="item-card"><div class="item-icon">🎯</div><div class="item-title">Valorant</div><div class="item-sub"><span class="badge badge-green">Active</span></div></div>
+        <div class="item-card"><div class="item-icon">🔫</div><div class="item-title">BGMI</div><div class="item-sub"><span class="badge badge-green">Active</span></div></div>
+        <div class="item-card"><div class="item-icon">🏟️</div><div class="item-title">Free Fire</div><div class="item-sub"><span class="badge badge-gray">Coming Soon</span></div></div>
+        <div class="item-card"><div class="item-icon">💥</div><div class="item-title">COD Mobile</div><div class="item-sub"><span class="badge badge-gray">Coming Soon</span></div></div>
+        <div class="item-card"><div class="item-icon">🌩️</div><div class="item-title">More Games</div><div class="item-sub"><span class="badge badge-purple">Season 2</span></div></div>
       </div>
     </section>
 
     <!-- How It Works -->
     <section>
       <h2>⚡ How It Works</h2>
-      <p>Getting into a Beast Arena tournament is simple. Follow these 4 steps and start your journey.</p>
-      <div class="steps-grid">
-        <div class="step-card">
-          <div class="step-num">1</div>
-          <div class="step-title">Create Account</div>
-          <div class="step-desc">Sign up free via email, Discord, or Google in seconds.</div>
-        </div>
-        <div class="step-card">
-          <div class="step-num">2</div>
-          <div class="step-title">Browse Events</div>
-          <div class="step-desc">Check open tournaments and choose the game you excel at.</div>
-        </div>
-        <div class="step-card">
-          <div class="step-num">3</div>
-          <div class="step-title">Apply & Compete</div>
-          <div class="step-desc">Submit your application, get shortlisted, and play live.</div>
-        </div>
-        <div class="step-card">
-          <div class="step-num">4</div>
-          <div class="step-title">Win Prizes</div>
-          <div class="step-desc">Top players receive brand-sponsored cash prizes guaranteed.</div>
-        </div>
+      <p>4 simple steps to start competing in Beast Arena tournaments.</p>
+      <div class="grid-4" style="margin-top:1rem;">
+        <div class="step-card"><div class="step-num">1</div><div class="step-title">Sign Up Free</div><div class="step-desc">Register via email, Discord or Google.</div></div>
+        <div class="step-card"><div class="step-num">2</div><div class="step-title">Find Events</div><div class="step-desc">Browse open tournaments for your game.</div></div>
+        <div class="step-card"><div class="step-num">3</div><div class="step-title">Apply & Play</div><div class="step-desc">Get shortlisted and compete live.</div></div>
+        <div class="step-card"><div class="step-num">4</div><div class="step-title">Win Prizes</div><div class="step-desc">Brand-sponsored cash paid same day.</div></div>
       </div>
     </section>
 
-    <!-- Player Reviews -->
+    <!-- Reviews -->
     <section>
-      <h2>💬 What Players Say</h2>
-      <p>Real feedback from our community of competitive gamers.</p>
-      <div class="reviews-grid">
+      <h2>💬 Player Reviews</h2>
+      <div class="grid-3" style="margin-top:1rem;">
         <div class="review-card">
           <div class="review-stars">★★★★★</div>
-          <p class="review-text">"Beast Arena gave me the platform I always wanted. The tournament was super organised and the prize payout was instant. 10/10 would recommend!"</p>
-          <div class="review-author">
-            <div class="review-avatar">AK</div>
-            <div>
-              <div class="review-name">Arjun Kumar</div>
-              <div class="review-game">Valorant Player</div>
-            </div>
-          </div>
+          <p class="review-text">"Super organised, instant payout. Best gaming event I've joined. 10/10!"</p>
+          <div class="review-meta"><div class="review-av">AK</div><div><div class="review-name">Arjun Kumar</div><div class="review-game">Valorant</div></div></div>
         </div>
         <div class="review-card">
           <div class="review-stars">★★★★★</div>
-          <p class="review-text">"The Minecraft 100-player event was insane! Never thought I'd get to compete at this level for free. Beast Arena is legit the real deal."</p>
-          <div class="review-author">
-            <div class="review-avatar">RS</div>
-            <div>
-              <div class="review-name">Ravi Singh</div>
-              <div class="review-game">Minecraft Player</div>
-            </div>
-          </div>
+          <p class="review-text">"100-player Minecraft event was insane. Never expected to compete for free at this level!"</p>
+          <div class="review-meta"><div class="review-av">RS</div><div><div class="review-name">Ravi Singh</div><div class="review-game">Minecraft</div></div></div>
         </div>
         <div class="review-card">
           <div class="review-stars">★★★★☆</div>
-          <p class="review-text">"Very professional setup. Got shortlisted within 2 days and the match was streamed live. This is the future of indie esports in India!"</p>
-          <div class="review-author">
-            <div class="review-avatar">PM</div>
-            <div>
-              <div class="review-name">Priya Mehta</div>
-              <div class="review-game">BGMI Player</div>
-            </div>
-          </div>
+          <p class="review-text">"Professional setup, live stream, shortlisted in 2 days. Future of indie esports in India!"</p>
+          <div class="review-meta"><div class="review-av">PM</div><div><div class="review-name">Priya Mehta</div><div class="review-game">BGMI</div></div></div>
         </div>
         <div class="review-card">
           <div class="review-stars">★★★★★</div>
-          <p class="review-text">"Zero entry fee, transparent prizes, great vibes. The team at Beast Arena actually cares about the players. Signed up for my 3rd tourney already!"</p>
-          <div class="review-author">
-            <div class="review-avatar">DG</div>
-            <div>
-              <div class="review-name">Dev Gupta</div>
-              <div class="review-game">Valorant Player</div>
-            </div>
-          </div>
+          <p class="review-text">"Zero entry, transparent prizes, great vibes. Already on my 3rd tournament!"</p>
+          <div class="review-meta"><div class="review-av">DG</div><div><div class="review-name">Dev Gupta</div><div class="review-game">Valorant</div></div></div>
         </div>
         <div class="review-card">
           <div class="review-stars">★★★★★</div>
-          <p class="review-text">"I was skeptical at first, but the tournament ran smooth and prize money landed the same day. Trust me, just apply. You won't regret it."</p>
-          <div class="review-author">
-            <div class="review-avatar">NK</div>
-            <div>
-              <div class="review-name">Nikhil Kaur</div>
-              <div class="review-game">BGMI Player</div>
-            </div>
-          </div>
+          <p class="review-text">"Prize money landed same day results were out. 100% trustworthy — just apply!"</p>
+          <div class="review-meta"><div class="review-av">NK</div><div><div class="review-name">Nikhil Kaur</div><div class="review-game">BGMI</div></div></div>
         </div>
         <div class="review-card">
           <div class="review-stars">★★★★★</div>
-          <p class="review-text">"Best esports experience I've had outside of big-name tournaments. The registration process is dead simple and the community is super welcoming."</p>
-          <div class="review-author">
-            <div class="review-avatar">SM</div>
-            <div>
-              <div class="review-name">Sneha Mishra</div>
-              <div class="review-game">Minecraft Player</div>
-            </div>
-          </div>
+          <p class="review-text">"Dead simple registration and the community is super welcoming. Love Beast Arena!"</p>
+          <div class="review-meta"><div class="review-av">SM</div><div><div class="review-name">Sneha Mishra</div><div class="review-game">Minecraft</div></div></div>
         </div>
       </div>
     </section>
 
-    <!-- CTA Banner -->
-    <section style="border:none; padding:0; background:transparent; box-shadow:none;">
-      <div class="cta-banner">
-        <div>
-          <h3>🚀 Ready to Join the Next Tournament?</h3>
-          <p>Applications for Season 2 are now open. Limited slots available — don't miss your chance!</p>
-        </div>
-        <a href="/register" class="btn-primary">Apply Now →</a>
+    <!-- CTA -->
+    <div class="cta-strip" style="margin-bottom:1.25rem;">
+      <div>
+        <h3>🚀 Ready for Season 2?</h3>
+        <p>Applications open now — limited slots available!</p>
       </div>
-    </section>
+      <a href="/register" class="btn btn-white">Apply Now →</a>
+    </div>
 
-    <hr>
   </main>
 
   <footer>
@@ -427,58 +151,55 @@
       const token = localStorage.getItem('playerToken');
       if (!token) { window.location.href = '/login'; return; }
 
-      // Logout
-      const logoutBtn = document.getElementById('player-logout-btn');
-      if (logoutBtn) logoutBtn.addEventListener('click', () => {
+      document.getElementById('player-logout-btn')?.addEventListener('click', () => {
         localStorage.removeItem('playerToken'); window.location.href = '/login';
       });
 
-      // Welcome popup
       const raw = sessionStorage.getItem('welcomeInfo');
       if (raw) {
         sessionStorage.removeItem('welcomeInfo');
-        try { const d = JSON.parse(raw); showWelcomePopup(d.isNew, d.username, d.source); }
-        catch(e) {}
+        try { const d = JSON.parse(raw); showPopup(d.isNew, d.username, d.source); } catch {}
       }
     });
 
-    function showWelcomePopup(isNew, username, source) {
-      const popup    = document.getElementById('welcome-popup');
-      const emoji    = document.getElementById('popup-emoji');
-      const badge    = document.getElementById('popup-badge');
-      const title    = document.getElementById('popup-title');
-      const nameEl   = document.getElementById('popup-name');
-      const subEl    = document.getElementById('popup-sub');
-      const closeBtn = document.getElementById('popup-close-btn');
-
+    function showPopup(isNew, username, source) {
+      const el = id => document.getElementById(id);
       if (isNew) {
-        emoji.textContent = '🎉'; title.textContent = 'Welcome to Beast Arena!';
-        nameEl.textContent = `Hey ${username||'Player'}, great to have you!`;
-        subEl.textContent = 'Your account is created. Time to dominate the arena!';
-        closeBtn.textContent = "Let's Play! 🎮";
+        el('popup-emoji').textContent = '🎉';
+        el('popup-title').textContent = 'Welcome to Beast Arena!';
+        el('popup-who').textContent   = `Hey ${username||'Player'}, great to have you!`;
+        el('popup-sub').textContent   = 'Account created — time to dominate!';
+        el('popup-btn').textContent   = "Let's Play! 🎮";
       } else {
-        emoji.textContent = '🔥'; title.textContent = 'Welcome Back!';
-        nameEl.textContent = `Good to see you again, ${username||'Player'}!`;
-        subEl.textContent = 'Ready to compete? The arena awaits you.';
-        closeBtn.textContent = 'Back to Action! ⚔️';
+        el('popup-emoji').textContent = '🔥';
+        el('popup-title').textContent = 'Welcome Back!';
+        el('popup-who').textContent   = `Good to see you, ${username||'Player'}!`;
+        el('popup-sub').textContent   = 'The arena awaits you.';
+        el('popup-btn').textContent   = 'Back to Action! ⚔️';
       }
+      const map = { discord:['⚡ Discord','discord'], google:['🔍 Google','google'], email:['✉️ Email','email'] };
+      const [label, cls] = map[source] || map.email;
+      const badge = el('popup-badge');
+      badge.textContent = label; badge.className = `welcome-badge ${cls}`;
 
-      const sources = { discord:{label:'⚡ Discord',cls:'discord'}, google:{label:'🔍 Google',cls:'google'}, email:{label:'✉️ Email',cls:'email'} };
-      const s = sources[source] || sources.email;
-      badge.textContent = s.label; badge.className = `welcome-source-badge ${s.cls}`;
+      const popup = el('welcome-popup');
       popup.style.display = 'flex';
 
-      const ringP = document.getElementById('ring-progress');
-      const ringC = document.getElementById('ring-count');
+      const prog = el('ring-prog'); const countEl = el('ring-count');
       let rem = 4;
-      const tick = () => { rem--; ringC.textContent=rem; ringP.style.strokeDashoffset=100*(1-rem/4); if(rem<=0) dismiss(); };
-      const t = setInterval(tick, 1000);
+      const t = setInterval(() => {
+        rem--; countEl.textContent = rem;
+        prog.style.strokeDashoffset = 100 * (1 - rem / 4);
+        if (rem <= 0) dismiss();
+      }, 1000);
+
       function dismiss() {
-        clearInterval(t); popup.classList.add('hide');
-        setTimeout(()=>{ popup.style.display='none'; }, 400);
+        clearInterval(t);
+        popup.style.animation = 'fadeOut 0.3s ease forwards';
+        setTimeout(() => popup.style.display = 'none', 300);
       }
-      closeBtn.addEventListener('click', dismiss);
-      popup.addEventListener('click', e=>{ if(e.target===popup) dismiss(); });
+      el('popup-btn').addEventListener('click', dismiss);
+      popup.addEventListener('click', e => { if (e.target === popup) dismiss(); });
     }
   </script>
 </body>

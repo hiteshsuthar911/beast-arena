@@ -4,247 +4,112 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About Us - Beast Arena Gaming Network</title>
-  <meta name="description" content="Meet the team behind Beast Arena — India's premier free-to-enter esports tournament platform founded by Hitesh Suthar.">
+  <meta name="description" content="Meet Hitesh Suthar and the team behind Beast Arena — India's premier free esports tournament platform.">
   <link rel="stylesheet" href="/index.css">
   <script src="/nav.js" defer></script>
-  <style>
-    /* Founder card */
-    .founder-card {
-      display: flex;
-      align-items: flex-start;
-      gap: 2rem;
-      flex-wrap: wrap;
-    }
-    .founder-avatar {
-      width: 110px; height: 110px; border-radius: 50%;
-      background: linear-gradient(135deg, #4f46e5, #818cf8);
-      color: #fff; font-size: 2.8rem; font-weight: 800;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      box-shadow: 0 8px 24px rgba(79,70,229,.3);
-    }
-    .founder-info { flex: 1; min-width: 200px; }
-    .founder-name { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0 0 .25rem; }
-    .founder-title{ font-size:.9rem; color:#4f46e5; font-weight:600; margin-bottom:.75rem; }
-    .founder-bio  { font-size:.93rem; color:#334155; line-height:1.65; margin-bottom:1rem; }
-    .founder-tags { display:flex; flex-wrap:wrap; gap:.5rem; }
-    .founder-tag  {
-      background:#f1f5f9; color:#475569;
-      font-size:.78rem; font-weight:600;
-      padding:4px 10px; border-radius:20px;
-    }
-
-    /* Social links */
-    .social-links { display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1rem; }
-    .social-link {
-      display:inline-flex; align-items:center; gap:.4rem;
-      padding:.5rem 1rem; border-radius:8px;
-      font-size:.85rem; font-weight:600; text-decoration:none;
-      border:1px solid #e2e8f0; color:#334155;
-      transition:all .2s;
-    }
-    .social-link:hover { border-color:#4f46e5; color:#4f46e5; background:#f1f5f9; }
-
-    /* Values grid */
-    .values-grid {
-      display:grid; grid-template-columns:repeat(2,1fr); gap:1rem;
-    }
-    .value-card {
-      border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem;
-      transition:border-color .2s, transform .2s;
-    }
-    .value-card:hover { border-color:#4f46e5; transform:translateY(-2px); }
-    .value-icon  { font-size:1.8rem; margin-bottom:.5rem; }
-    .value-title { font-weight:700; font-size:.95rem; color:#0f172a; margin:.25rem 0; }
-    .value-desc  { font-size:.84rem; color:#64748b; line-height:1.5; }
-
-    /* Mission */
-    .mission-strip {
-      background:linear-gradient(135deg,#1e1b4b,#4f46e5);
-      border-radius:14px; padding:2.5rem;
-      color:#fff; text-align:center;
-    }
-    .mission-strip h3 { color:#fff; margin:0 0 .75rem; font-size:1.3rem; }
-    .mission-strip p  { color:rgba(255,255,255,.85); max-width:580px; margin:0 auto; font-size:.95rem; line-height:1.65; }
-
-    /* Timeline */
-    .timeline { position:relative; padding-left:2.5rem; }
-    .timeline::before {
-      content:''; position:absolute; left:.9rem; top:0; bottom:0;
-      width:2px; background:#e2e8f0; border-radius:2px;
-    }
-    .tl-item { position:relative; margin-bottom:1.5rem; }
-    .tl-dot  {
-      position:absolute; left:-2rem; top:.2rem;
-      width:14px; height:14px; border-radius:50%;
-      background:#4f46e5; border:3px solid #fff;
-      box-shadow:0 0 0 2px #4f46e5;
-    }
-    .tl-date  { font-size:.8rem; color:#4f46e5; font-weight:700; margin-bottom:.2rem; }
-    .tl-title { font-weight:700; color:#0f172a; font-size:.95rem; }
-    .tl-desc  { font-size:.85rem; color:#64748b; margin-top:.2rem; }
-
-    @media(max-width:640px) {
-      .founder-card  { flex-direction:column; align-items:center; text-align:center; }
-      .founder-tags, .social-links { justify-content:center; }
-      .values-grid   { grid-template-columns:1fr; }
-    }
-  </style>
 </head>
 <body>
 
   <header>
-    <h1>Beast Arena Gaming Network</h1>
-    <p><strong>Where Mass Entertainment Meets Esports</strong></p>
-    <nav>
-      <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/about">About Us</a></li>
-        <li><a href="/login">Player Portal (Login)</a></li>
-        <li><a href="/winners">Past Winners</a></li>
-        <li><a href="/register">Tournament Registration</a></li>
-        <li><a href="/profile">My Profile</a></li>
-        <li><button id="player-logout-btn" type="button">Log Out</button></li>
-      </ul>
-    </nav>
+    <div class="header-inner">
+      <h1>Beast Arena Gaming Network</h1>
+      <p><strong>Where Mass Entertainment Meets Esports</strong></p>
+      <nav>
+        <ul class="desktop-nav">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About Us</a></li>
+          <li><a href="/login">Player Portal</a></li>
+          <li><a href="/winners">Past Winners</a></li>
+          <li><a href="/register">Register</a></li>
+          <li><a href="/profile">My Profile</a></li>
+          <li><button id="player-logout-btn">Log Out</button></li>
+        </ul>
+        <button class="menu-toggle-btn" id="menu-open-btn">☰ Menu</button>
+      </nav>
+    </div>
   </header>
 
   <main>
-    <hr>
 
-    <!-- About the Company -->
+    <!-- Overview -->
     <section>
       <h2>About Beast Arena</h2>
-      <p>
-        Beast Arena is an entertainment-driven esports organizer creating high-stakes, challenge-based tournament videos inspired by the global creator format. We bridge the gap between casual gamers and massive audiences by hosting curated competitive matches in Minecraft, Valorant, BGMI, and more.
-      </p>
-      <p>
-        Our business model is built on three pillars: <strong>zero-cost player entries</strong>, <strong>completely brand-sponsored prize pools</strong>, and <strong>high-quality digital content</strong> distributed across YouTube and social platforms. Every tournament is a production — not just a competition.
-      </p>
-
-      <hr style="margin:1.5rem 0">
+      <p>Beast Arena is an entertainment-driven esports organizer creating high-stakes, challenge-based tournaments inspired by the global creator format. We bridge the gap between casual gamers and massive audiences by hosting curated matches in Minecraft, Valorant, BGMI, and more.</p>
+      <p>Our model is built on three pillars: <strong>zero-cost entry</strong>, <strong>brand-sponsored prize pools</strong>, and <strong>high-quality video content</strong> distributed across YouTube and social platforms.</p>
 
       <!-- Mission -->
-      <div class="mission-strip">
-        <h3>🎯 Our Mission</h3>
-        <p>To democratise competitive gaming in India by giving every skilled player — regardless of background — a fair, free, and professionally produced platform to compete, grow, and get recognised.</p>
+      <div style="background:#1e1b4b;border-radius:10px;padding:1.5rem;color:#fff;text-align:center;margin-top:1.25rem;">
+        <div style="font-size:1.5rem;margin-bottom:.4rem;">🎯</div>
+        <h3 style="color:#fff;margin:0 0 .5rem;font-size:1rem;">Our Mission</h3>
+        <p style="color:rgba(255,255,255,.8);margin:0;font-size:.88rem;max-width:500px;margin:0 auto;line-height:1.6;">
+          To democratise competitive gaming in India — giving every skilled player a fair, free, and professionally produced platform to compete, grow, and get recognised.
+        </p>
       </div>
     </section>
 
     <!-- Core Values -->
     <section>
       <h2>🏅 Core Values</h2>
-      <div class="values-grid">
-        <div class="value-card">
-          <div class="value-icon">🆓</div>
-          <div class="value-title">100% Free Entry</div>
-          <div class="value-desc">No registration fees — ever. All shortlisted players compete at zero cost. Skill is the only barrier to entry.</div>
-        </div>
-        <div class="value-card">
-          <div class="value-icon">💸</div>
-          <div class="value-title">Transparent Payouts</div>
-          <div class="value-desc">Prize pools are fully brand-sponsored and paid out transparently. Winners receive funds the same day results are announced.</div>
-        </div>
-        <div class="value-card">
-          <div class="value-icon">🎬</div>
-          <div class="value-title">Premium Production</div>
-          <div class="value-desc">Every tournament is filmed, edited, and published as high-quality content. Players become part of something bigger than just a match.</div>
-        </div>
-        <div class="value-card">
-          <div class="value-icon">🛡️</div>
-          <div class="value-title">Zero Toxicity Policy</div>
-          <div class="value-desc">Cheating, hacking, or toxic behaviour results in immediate and permanent disqualification. We protect our competitive integrity above all.</div>
-        </div>
+      <div class="grid-2">
+        <div class="value-card"><div class="value-icon">🆓</div><div class="value-title">100% Free Entry</div><div class="value-desc">No fees ever. Skill is the only barrier to entry.</div></div>
+        <div class="value-card"><div class="value-icon">💸</div><div class="value-title">Transparent Payouts</div><div class="value-desc">Brand-sponsored prizes paid out same day results are announced.</div></div>
+        <div class="value-card"><div class="value-icon">🎬</div><div class="value-title">Premium Production</div><div class="value-desc">Every match is filmed and published as high-quality content.</div></div>
+        <div class="value-card"><div class="value-icon">🛡️</div><div class="value-title">Zero Toxicity</div><div class="value-desc">Cheating or toxic behaviour = permanent disqualification. No exceptions.</div></div>
       </div>
     </section>
 
-    <!-- Founder Section -->
+    <!-- Founder -->
     <section>
       <h2>👤 Meet the Founder</h2>
       <div class="founder-card">
-        <div class="founder-avatar">HS</div>
+        <div class="founder-av">HS</div>
         <div class="founder-info">
           <div class="founder-name">Hitesh Suthar</div>
-          <div class="founder-title">Founder & CEO — Beast Arena Gaming Network</div>
+          <div class="founder-role">Founder & CEO — Beast Arena Gaming Network</div>
           <p class="founder-bio">
-            Hitesh Suthar is a passionate gamer, entrepreneur, and digital creator from India. With a deep love for competitive gaming and video content creation, he founded Beast Arena to fill a gap he experienced firsthand — a platform where skilled Indian gamers could compete at a professional level without financial barriers.
+            Hitesh Suthar is a passionate gamer, entrepreneur, and digital creator from India. He founded Beast Arena to fill a gap he experienced firsthand — a platform where skilled Indian gamers can compete professionally without financial barriers.
           </p>
           <p class="founder-bio">
-            Hitesh brings together his knowledge of gaming culture, content production, and brand partnerships to run Beast Arena as a fully sustainable, player-first esports operation. His vision is to build India's most recognised entertainment esports brand — one tournament at a time.
+            He brings expertise in gaming culture, content production, and brand partnerships to run Beast Arena as a fully sustainable, player-first esports operation.
           </p>
-          <div class="founder-tags">
-            <span class="founder-tag">🎮 Competitive Gamer</span>
-            <span class="founder-tag">🎬 Content Creator</span>
-            <span class="founder-tag">🚀 Entrepreneur</span>
-            <span class="founder-tag">🇮🇳 Made in India</span>
-            <span class="founder-tag">⚡ Discord Community Builder</span>
+          <div class="tags">
+            <span class="tag">🎮 Competitive Gamer</span>
+            <span class="tag">🎬 Content Creator</span>
+            <span class="tag">🚀 Entrepreneur</span>
+            <span class="tag">🇮🇳 Made in India</span>
+            <span class="tag">⚡ Community Builder</span>
           </div>
-          <div class="social-links">
-            <a href="https://discord.com" target="_blank" class="social-link">⚡ Discord</a>
-            <a href="https://github.com/hiteshsuthar911" target="_blank" class="social-link">🐙 GitHub</a>
-            <a href="https://youtube.com" target="_blank" class="social-link">🎬 YouTube</a>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem;">
+            <a href="https://discord.com" target="_blank" style="text-decoration:none;font-size:.82rem;font-weight:600;padding:.4rem .85rem;border:1px solid #e2e8f0;border-radius:8px;color:#334155;">⚡ Discord</a>
+            <a href="https://github.com/hiteshsuthar911" target="_blank" style="text-decoration:none;font-size:.82rem;font-weight:600;padding:.4rem .85rem;border:1px solid #e2e8f0;border-radius:8px;color:#334155;">🐙 GitHub</a>
+            <a href="https://youtube.com" target="_blank" style="text-decoration:none;font-size:.82rem;font-weight:600;padding:.4rem .85rem;border:1px solid #e2e8f0;border-radius:8px;color:#334155;">🎬 YouTube</a>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Journey / Timeline -->
+    <!-- Timeline -->
     <section>
       <h2>📅 Our Journey</h2>
       <div class="timeline">
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-date">Early 2025</div>
-          <div class="tl-title">The Idea is Born</div>
-          <div class="tl-desc">Hitesh identifies the gap in India's casual esports scene and begins planning Beast Arena's format and brand identity.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-date">Mid 2025</div>
-          <div class="tl-title">First Discord Community</div>
-          <div class="tl-desc">Beast Arena's Discord server launches and quickly grows to 200+ members across Minecraft, Valorant, and BGMI communities.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-date">Late 2025</div>
-          <div class="tl-title">First Official Tournament</div>
-          <div class="tl-desc">Minecraft: 100 Players Island Survival — Beast Arena's debut event with a fully brand-sponsored ₹10,000 prize pool.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-date">2026</div>
-          <div class="tl-title">Platform Launch</div>
-          <div class="tl-desc">The Beast Arena web platform goes live with player registration, admin dashboards, Discord OAuth, and tournament management.</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-dot" style="background:#16a34a; box-shadow:0 0 0 2px #16a34a;"></div>
-          <div class="tl-date" style="color:#16a34a;">Now — Season 2</div>
-          <div class="tl-title">Season 2 Expansion</div>
-          <div class="tl-desc">Expanding to Valorant, BGMI, Free Fire and COD Mobile with bigger prize pools and national-level coverage. Apply now!</div>
-        </div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-date">Early 2025</div><div class="tl-title">The Idea is Born</div><div class="tl-desc">Hitesh spots the gap in India's casual esports scene and starts planning Beast Arena.</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-date">Mid 2025</div><div class="tl-title">Discord Community Launched</div><div class="tl-desc">Server goes live and grows to 200+ members across Minecraft, Valorant, and BGMI.</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-date">Late 2025</div><div class="tl-title">First Official Tournament</div><div class="tl-desc">Minecraft: 100 Players Island Survival — debut event with ₹10,000 brand-sponsored prize pool.</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-date">2026</div><div class="tl-title">Platform Goes Live</div><div class="tl-desc">Web platform launches with player registration, Discord OAuth, and admin dashboard.</div></div>
+        <div class="tl-item"><div class="tl-dot" style="background:#16a34a;box-shadow:0 0 0 2px #16a34a;"></div><div class="tl-date" style="color:#16a34a;">Now — Season 2</div><div class="tl-title">Season 2 Expansion</div><div class="tl-desc">Expanding to Valorant, BGMI, Free Fire and COD Mobile with bigger prize pools.</div></div>
       </div>
     </section>
 
-    <!-- Stats -->
+    <!-- Numbers -->
     <section>
-      <h2>📊 Beast Arena by the Numbers</h2>
-      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; text-align:center;">
-        <div style="padding:1.25rem; border:1px solid #e2e8f0; border-radius:10px;">
-          <div style="font-size:2rem; font-weight:800; color:#4f46e5;">500+</div>
-          <div style="font-size:.85rem; color:#64748b; margin-top:.25rem;">Registered Players</div>
-        </div>
-        <div style="padding:1.25rem; border:1px solid #e2e8f0; border-radius:10px;">
-          <div style="font-size:2rem; font-weight:800; color:#4f46e5;">24</div>
-          <div style="font-size:.85rem; color:#64748b; margin-top:.25rem;">Tournaments Completed</div>
-        </div>
-        <div style="padding:1.25rem; border:1px solid #e2e8f0; border-radius:10px;">
-          <div style="font-size:2rem; font-weight:800; color:#4f46e5;">₹2L+</div>
-          <div style="font-size:.85rem; color:#64748b; margin-top:.25rem;">Total Prize Distributed</div>
-        </div>
+      <h2>📊 By the Numbers</h2>
+      <div class="grid-3">
+        <div class="stat-card"><div class="stat-value">500+</div><div class="stat-label">Registered Players</div></div>
+        <div class="stat-card"><div class="stat-value">24</div><div class="stat-label">Tournaments Hosted</div></div>
+        <div class="stat-card"><div class="stat-value">₹2L+</div><div class="stat-label">Total Prize Distributed</div></div>
       </div>
     </section>
 
-    <hr>
   </main>
 
   <footer>
@@ -255,8 +120,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       const token = localStorage.getItem('playerToken');
       if (!token) { window.location.href = '/login'; return; }
-      const logoutBtn = document.getElementById('player-logout-btn');
-      if (logoutBtn) logoutBtn.addEventListener('click', () => {
+      document.getElementById('player-logout-btn')?.addEventListener('click', () => {
         localStorage.removeItem('playerToken'); window.location.href = '/login';
       });
     });
