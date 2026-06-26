@@ -57,7 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const desktopUl = desktopNav.querySelector('ul');
   if (desktopUl) {
     const overlayUl = desktopUl.cloneNode(true);
-    
+    overlayUl.classList.remove('desktop-nav'); // prevent mobile CSS from hiding the cloned list
+
     // Bind click events on the cloned buttons (like Sign Out / Log Out)
     const originalButtons = desktopUl.querySelectorAll('button');
     const clonedButtons = overlayUl.querySelectorAll('button');
