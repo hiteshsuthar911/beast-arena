@@ -470,7 +470,7 @@ router.post('/admin/login', async (req, res) => {
       expiresAt: Date.now() + 5 * 60 * 1000
     };
 
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@beast-arena.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'thebeastarenaa@gmail.com';
 
     // Trigger sending the email
     await sendOtpEmail(adminEmail, otp);
