@@ -27,18 +27,27 @@ async function sendOtpEmail(toEmail, otp) {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
-  if (!host || !user || !pass) {
-    console.log(`[Email Service] SMTP configuration missing in env. OTP sent only to console.`);
+  if (!user || !pass) {
+    console.log(`[Email Service] SMTP credentials (SMTP_USER, SMTP_PASS) missing in env. OTP sent only to console.`);
     return { success: true, loggedToConsole: true };
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      host,
-      port: parseInt(port, 10),
-      secure: port === '465',
-      auth: { user, pass }
-    });
+    let transporter;
+    if (!host && user.endsWith('@gmail.com')) {
+      transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: { user, pass }
+      });
+      console.log(`[Email Service] Auto-configured Gmail service for ${user}`);
+    } else {
+      transporter = nodemailer.createTransport({
+        host: host || 'smtp.gmail.com',
+        port: parseInt(port, 10),
+        secure: port === '465',
+        auth: { user, pass }
+      });
+    }
 
     const info = await transporter.sendMail({
       from: `"Beast Arena Security" <${user}>`,
