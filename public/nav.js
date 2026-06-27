@@ -1,3 +1,9 @@
+// Apply saved theme or default light theme immediately to prevent flashing
+(function() {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
   const header = document.querySelector('header');
   if (!header) return;
@@ -17,6 +23,72 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Mark desktop navigation
   desktopNav.classList.add('desktop-nav');
+
+  // Insert theme toggle button
+  const themeLi = document.createElement('li');
+  themeLi.className = 'theme-toggle-item';
+
+  const themeBtn = document.createElement('button');
+  themeBtn.id = 'theme-toggle-btn';
+  themeBtn.className = 'theme-toggle-btn-ui';
+  themeBtn.type = 'button';
+  themeBtn.style.padding = '0.45rem 0.8rem';
+  themeBtn.style.background = 'transparent';
+  themeBtn.style.border = 'none';
+  themeBtn.style.cursor = 'pointer';
+  themeBtn.style.fontSize = '0.9rem';
+  themeBtn.style.display = 'inline-flex';
+  themeBtn.style.alignItems = 'center';
+  themeBtn.style.justifyContent = 'center';
+
+  const updateToggleUI = (theme) => {
+    themeBtn.innerHTML = theme === 'dark' ? '☀️' : '🌙';
+    themeBtn.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+  };
+
+  updateToggleUI(localStorage.getItem('theme') || 'light');
+
+  themeBtn.addEventListener('click', () => {
+    const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateToggleUI(newTheme);
+
+    const mobileBtn = document.querySelector('.overlay-nav .theme-toggle-btn-ui');
+    if (mobileBtn) {
+      mobileBtn.innerHTML = newTheme === 'dark' ? '☀️' : '🌙';
+    }
+  });
+
+  themeLi.appendChild(themeBtn);
+
+  const desktopUl = desktopNav.querySelector('ul');
+  if (desktopUl) {
+    desktopUl.appendChild(themeLi);
+  }
+
+  // Sync navigation item visibility based on authentication state
+  const syncNavItems = (navElement) => {
+    const token = localStorage.getItem('playerToken');
+    const logoutLi = navElement.querySelector('#player-logout-btn')?.closest('li');
+    const profileLi = navElement.querySelector('a[href="/profile"]')?.closest('li');
+    const registerLi = navElement.querySelector('a[href="/register"]')?.closest('li');
+    const loginLi = navElement.querySelector('a[href="/login"]')?.closest('li');
+    
+    if (token) {
+      if (loginLi) loginLi.setAttribute('hidden', '');
+      if (logoutLi) logoutLi.removeAttribute('hidden');
+      if (profileLi) profileLi.removeAttribute('hidden');
+      if (registerLi) registerLi.removeAttribute('hidden');
+    } else {
+      if (loginLi) loginLi.removeAttribute('hidden');
+      if (logoutLi) logoutLi.setAttribute('hidden', '');
+      if (profileLi) profileLi.setAttribute('hidden', '');
+      if (registerLi) registerLi.setAttribute('hidden', '');
+    }
+  };
+
+  syncNavItems(desktopNav);
 
   // 1. Create Mobile Hamburger Menu Button
   const toggleBtn = document.createElement('button');
@@ -66,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
   overlayNav.className = 'overlay-nav';
 
   // Clone desktop navigation lists dynamically to keep links synchronized
-  const desktopUl = desktopNav.querySelector('ul');
   if (desktopUl) {
     const overlayUl = desktopUl.cloneNode(true);
     overlayUl.classList.remove('desktop-nav'); // prevent mobile CSS from hiding the cloned list
@@ -86,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   overlay.appendChild(overlayNav);
-  header.appendChild(overlay);
+  document.body.appendChild(overlay);
 
   // 3. Register Overlay Toggle Listeners
   function openOverlay() {
