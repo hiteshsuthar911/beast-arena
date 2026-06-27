@@ -73,13 +73,21 @@
           <button type="submit" class="auth-submit-btn" style="margin-top:1.5rem; width:100%;">Access Control Panel</button>
         </form>
 
-        <!-- OTP Verification Form (Hidden by default) -->
+        <!-- OTP Verification Form (Hidden by default, styled as individual digit boxes) -->
         <form id="admin-otp-form" hidden>
           <p style="font-size: 0.9rem; color: var(--fg-muted); margin: 0 0 1rem; line-height: 1.5;">A 6-digit verification code has been generated and sent to the administrator's email.</p>
           
           <div class="form-group">
-            <label for="admin-otp">Enter OTP Code</label>
-            <input type="text" id="admin-otp" required placeholder="123456" pattern="\d{6}" maxlength="6" style="letter-spacing: 0.25em; text-align: center; font-size: 1.25rem; font-weight: bold; width: 100%; font-family: monospace;">
+            <label>Enter OTP Code</label>
+            <div class="otp-inputs-wrapper">
+              <input type="text" class="otp-digit" maxlength="1" pattern="\d" required inputmode="numeric">
+              <input type="text" class="otp-digit" maxlength="1" pattern="\d" required inputmode="numeric">
+              <input type="text" class="otp-digit" maxlength="1" pattern="\d" required inputmode="numeric">
+              <input type="text" class="otp-digit" maxlength="1" pattern="\d" required inputmode="numeric">
+              <input type="text" class="otp-digit" maxlength="1" pattern="\d" required inputmode="numeric">
+              <input type="text" class="otp-digit" maxlength="1" pattern="\d" required inputmode="numeric">
+            </div>
+            <input type="hidden" id="admin-otp">
           </div>
           
           <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
@@ -160,6 +168,10 @@
     const loginMessage = document.getElementById('admin-login-message');
     const logoutBtn = document.getElementById('admin-logout-btn');
     const refreshStatusBtn = document.getElementById('refresh-status-btn');
+    
+    // Select the split OTP digit input elements
+    const otpDigits = document.querySelectorAll('.otp-digit');
+    const hiddenOtpInput = document.getElementById('admin-otp');
 
     let currentTransactionId = '';
 
@@ -171,7 +183,60 @@
       } else {
         showLogin();
       }
+
+      // Configure split OTP logic
+      if (otpDigits.length > 0) {
+        otpDigits.forEach((input, index) => {
+          // Handle typing / digits entry
+          input.addEventListener('input', () => {
+            // Force single digit only
+            if (!/^\d$/.test(input.value)) {
+              input.value = '';
+              return;
+            }
+            // Advance focus to next input box
+            if (input.value.length === 1 && index < otpDigits.length - 1) {
+              otpDigits[index + 1].focus();
+            }
+            updateHiddenOtpValue();
+          });
+
+          // Handle backspace navigation
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace') {
+              if (input.value.length === 0 && index > 0) {
+                otpDigits[index - 1].focus();
+                otpDigits[index - 1].value = '';
+              } else {
+                input.value = '';
+              }
+              updateHiddenOtpValue();
+            }
+          });
+
+          // Handle paste action
+          input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pasteData = (e.clipboardData || window.clipboardData).getData('text').trim();
+            if (pasteData.length === 6 && /^\d+$/.test(pasteData)) {
+              pasteData.split('').forEach((char, idx) => {
+                otpDigits[idx].value = char;
+              });
+              otpDigits[5].focus();
+              updateHiddenOtpValue();
+            }
+          });
+        });
+      }
     });
+
+    function updateHiddenOtpValue() {
+      let code = '';
+      otpDigits.forEach(input => {
+        code += input.value;
+      });
+      hiddenOtpInput.value = code;
+    }
 
     function showLogin() {
       localStorage.removeItem('adminToken');
@@ -183,6 +248,10 @@
       otpForm.setAttribute('hidden', '');
       loginMessage.textContent = '';
       currentTransactionId = '';
+      
+      // Clear split digit inputs
+      otpDigits.forEach(input => input.value = '');
+      hiddenOtpInput.value = '';
     }
 
     function showDashboard() {
@@ -222,7 +291,7 @@
             }
             loginForm.setAttribute('hidden', '');
             otpForm.removeAttribute('hidden');
-            document.getElementById('admin-otp').focus();
+            setTimeout(() => { otpDigits[0].focus(); }, 50);
           } else {
             loginMessage.textContent = '';
             localStorage.setItem('adminToken', data.token);
@@ -246,7 +315,7 @@
       loginMessage.textContent = 'Verifying OTP code...';
       loginMessage.style.color = '#7c3aed';
 
-      const otp = document.getElementById('admin-otp').value;
+      const otp = hiddenOtpInput.value;
 
       try {
         const response = await fetch('/api/admin/verify-otp', {
