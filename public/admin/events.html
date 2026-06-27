@@ -144,9 +144,27 @@
             row.appendChild(dateCell);
 
             const actionCell = document.createElement('td');
+            
+            // View Submissions Button
+            const viewAppsBtn = document.createElement('button');
+            viewAppsBtn.textContent = 'View Submissions 🔍';
+            viewAppsBtn.type = 'button';
+            viewAppsBtn.style.padding = '4px 8px';
+            viewAppsBtn.style.fontSize = '12px';
+            viewAppsBtn.style.cursor = 'pointer';
+            viewAppsBtn.style.marginRight = '6px';
+            viewAppsBtn.addEventListener('click', () => {
+              window.location.href = `/admin/applications?eventId=${evt._id}`;
+            });
+            actionCell.appendChild(viewAppsBtn);
+
             if (evt.status === 'Open') {
               const closeBtn = document.createElement('button');
-              closeBtn.textContent = 'Close Registration';
+              closeBtn.textContent = 'Close Registration 🛑';
+              closeBtn.type = 'button';
+              closeBtn.style.padding = '4px 8px';
+              closeBtn.style.fontSize = '12px';
+              closeBtn.style.cursor = 'pointer';
               closeBtn.addEventListener('click', async () => {
                 if (confirm(`Are you sure you want to close registration for "${evt.title}"?`)) {
                   try {
@@ -170,8 +188,6 @@
                 }
               });
               actionCell.appendChild(closeBtn);
-            } else {
-              actionCell.textContent = '-';
             }
             row.appendChild(actionCell);
 

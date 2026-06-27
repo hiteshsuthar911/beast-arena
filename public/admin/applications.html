@@ -32,6 +32,19 @@
       <h2>Active Tournament Submissions</h2>
       <p>Confirm user identities, player profiles, and inspect their Google Drive video uploads.</p>
       
+      <!-- Tournament Filter Dropdown -->
+      <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <div>
+          <label for="event-filter" style="font-weight: bold; margin-right: 0.5rem;">Filter by Tournament:</label>
+          <select id="event-filter" style="padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg2); color: var(--fg); font-weight: bold; outline: none; min-width: 250px;">
+            <option value="all">All Tournaments</option>
+          </select>
+        </div>
+        <div style="font-size: 0.9rem; color: var(--fg-muted);">
+          Showing <span id="filtered-count" style="font-weight: bold; color: var(--accent);">0</span> applications.
+        </div>
+      </div>
+      
       <div class="table-container">
         <table border="1" id="applications-table">
           <thead>
@@ -69,8 +82,6 @@
       </div>
     </section>
 
-
-
     <hr>
   </main>
 
@@ -81,7 +92,7 @@
   <script>
     const logoutBtn = document.getElementById('admin-logout-btn');
     let eventsMap = {};
-
+    let allApplications = [];
     let token = '';
 
     // On Load: Check if token exists
@@ -92,10 +103,21 @@
         return;
       }
 
-
-
       await loadEventsMap(token);
-      loadApplications(token);
+      
+      // Check query parameter eventId
+      const urlParams = new URLSearchParams(window.location.search);
+      const filterEventId = urlParams.get('eventId');
+      if (filterEventId) {
+        document.getElementById('event-filter').value = filterEventId;
+      }
+      
+      // Handle dropdown change event
+      document.getElementById('event-filter').addEventListener('change', () => {
+        renderApplications();
+      });
+
+      await loadApplications(token);
     });
 
     // Handle Log Out
@@ -114,11 +136,18 @@
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.events) {
+            const eventFilterSelect = document.getElementById('event-filter');
             data.events.forEach(evt => {
               eventsMap[evt._id] = {
                 title: evt.title,
                 driveLink: evt.driveLink
               };
+              
+              // Append option to filter
+              const opt = document.createElement('option');
+              opt.value = evt._id;
+              opt.textContent = evt.title;
+              eventFilterSelect.appendChild(opt);
             });
           }
         }
@@ -143,184 +172,203 @@
 
         const data = await response.json();
         
-        if (data.success && data.applications.length > 0) {
-          appTableBody.innerHTML = '';
-          data.applications.forEach(app => {
-            const row = document.createElement('tr');
-            
-            // Resolve Event Title
-            const eventInfo = eventsMap[app.eventId] || { title: 'Unknown Event / Legacy', driveLink: '#' };
-            
-            const eventCell = document.createElement('td');
-            eventCell.textContent = eventInfo.title;
-            row.appendChild(eventCell);
-
-            const nameCell = document.createElement('td');
-            nameCell.textContent = app.fullName || 'N/A';
-            row.appendChild(nameCell);
-
-            const ageCell = document.createElement('td');
-            ageCell.textContent = app.age !== undefined && app.age !== null ? app.age : 'N/A';
-            row.appendChild(ageCell);
-
-            const emailCell = document.createElement('td');
-            emailCell.textContent = app.email || 'N/A';
-            row.appendChild(emailCell);
-            
-            const discordCell = document.createElement('td');
-            discordCell.textContent = app.discordUsername || 'N/A';
-            row.appendChild(discordCell);
-
-            const phoneCell = document.createElement('td');
-            phoneCell.textContent = app.phone || 'N/A';
-            row.appendChild(phoneCell);
-            
-            const micCell = document.createElement('td');
-            micCell.textContent = app.hasWorkingMic === true ? 'Yes' : (app.hasWorkingMic === false ? 'No' : 'N/A');
-            row.appendChild(micCell);
-
-            const gameCell = document.createElement('td');
-            gameCell.textContent = app.game || 'N/A';
-            row.appendChild(gameCell);
-            
-            const ignCell = document.createElement('td');
-            ignCell.textContent = app.ign || 'N/A';
-            row.appendChild(ignCell);
-
-            const uidCell = document.createElement('td');
-            uidCell.textContent = app.uid || 'N/A';
-            row.appendChild(uidCell);
-            
-            const rankCell = document.createElement('td');
-            rankCell.textContent = app.rank || 'N/A';
-            row.appendChild(rankCell);
-
-            const deviceCell = document.createElement('td');
-            deviceCell.textContent = app.device || 'N/A';
-            row.appendChild(deviceCell);
-
-            const teamStatusCell = document.createElement('td');
-            teamStatusCell.textContent = app.teamStatus || 'N/A';
-            row.appendChild(teamStatusCell);
-
-            const teamNameCell = document.createElement('td');
-            teamNameCell.textContent = app.teamName || 'N/A';
-            row.appendChild(teamNameCell);
-
-            const whyCell = document.createElement('td');
-            whyCell.textContent = app.whySelect || 'N/A';
-            row.appendChild(whyCell);
-
-            const creatorCell = document.createElement('td');
-            if (app.creatorLink) {
-              const link = document.createElement('a');
-              link.href = app.creatorLink;
-              link.target = '_blank';
-              link.textContent = 'View Link';
-              creatorCell.appendChild(link);
-            } else {
-              creatorCell.textContent = 'N/A';
-            }
-            row.appendChild(creatorCell);
-
-            const secondaryCell = document.createElement('td');
-            secondaryCell.textContent = (app.secondaryGames && app.secondaryGames.length > 0) ? app.secondaryGames.join(', ') : 'None';
-            row.appendChild(secondaryCell);
-
-            const referralCell = document.createElement('td');
-            referralCell.textContent = app.referral || 'N/A';
-            row.appendChild(referralCell);
-
-            // Google Drive custom verification column
-            const driveVerificationCell = document.createElement('td');
-            
-            // Format expected filename: IGN_FullName.mp4 safely
-            let expectedFilename = 'N/A';
-            if (app.ign || app.fullName) {
-              const cleanIGN = (app.ign || '').replace(/[^a-zA-Z0-9]/g, '_') || 'PLAYERIGN';
-              const cleanName = (app.fullName || '').replace(/[^a-zA-Z0-9]/g, '_') || 'PLAYERNAME';
-              expectedFilename = `${cleanIGN}_${cleanName}.mp4`;
-            }
-            
-            const filenameSpan = document.createElement('strong');
-            filenameSpan.textContent = expectedFilename;
-            driveVerificationCell.appendChild(filenameSpan);
-            
-            driveVerificationCell.appendChild(document.createElement('br'));
-            
-            if (eventInfo.driveLink && eventInfo.driveLink !== '#') {
-              const folderLink = document.createElement('a');
-              folderLink.href = eventInfo.driveLink;
-              folderLink.target = '_blank';
-              folderLink.textContent = 'Open Drive Folder';
-              driveVerificationCell.appendChild(folderLink);
-            } else {
-              driveVerificationCell.appendChild(document.createTextNode('No folder configured'));
-            }
-            row.appendChild(driveVerificationCell);
-            
-            const dateCell = document.createElement('td');
-            dateCell.textContent = app.submittedAt ? new Date(app.submittedAt).toLocaleString() : 'N/A';
-            row.appendChild(dateCell);
-
-            // Status Cell
-            const statusCell = document.createElement('td');
-            const appStatus = app.status || 'Pending';
-            const statusSpan = document.createElement('span');
-            statusSpan.textContent = appStatus;
-            statusSpan.className = `badge ${appStatus === 'Shortlisted' ? 'badge-green' : 'badge-purple'}`;
-            statusCell.appendChild(statusSpan);
-            row.appendChild(statusCell);
-
-            // Actions Cell
-            const actionsCell = document.createElement('td');
-            if (appStatus !== 'Shortlisted') {
-              const shortlistBtn = document.createElement('button');
-              shortlistBtn.textContent = 'Shortlist 🏆';
-              shortlistBtn.type = 'button';
-              shortlistBtn.style.padding = '4px 8px';
-              shortlistBtn.style.fontSize = '12px';
-              shortlistBtn.style.cursor = 'pointer';
-              shortlistBtn.addEventListener('click', async () => {
-                if (!confirm(`Are you sure you want to shortlist ${app.fullName || 'this player'}?`)) {
-                  return;
-                }
-                
-                try {
-                  const res = await fetch(`/api/admin/applications/${app._id}/shortlist`, {
-                    method: 'PUT',
-                    headers: {
-                      'Authorization': `Bearer ${token}`
-                    }
-                  });
-
-                  if (res.ok) {
-                    alert('Player shortlisted successfully!');
-                    loadApplications(token);
-                  } else {
-                    const errData = await res.json();
-                    alert(`Error: ${errData.message || 'Failed to shortlist'}`);
-                  }
-                } catch (err) {
-                  console.error(err);
-                  alert('Network error occurred.');
-                }
-              });
-              actionsCell.appendChild(shortlistBtn);
-            } else {
-              actionsCell.textContent = 'No actions';
-              actionsCell.style.color = '#64748b';
-            }
-            row.appendChild(actionsCell);
-            
-            appTableBody.appendChild(row);
-          });
+        if (data.success) {
+          allApplications = data.applications || [];
+          renderApplications();
         } else {
           appTableBody.innerHTML = '<tr><td colspan="22">No applications received yet.</td></tr>';
         }
       } catch (error) {
         console.error('Failed to load applications:', error);
         appTableBody.innerHTML = '<tr><td colspan="22">Error loading application database.</td></tr>';
+      }
+    }
+
+    // Render applications based on event selection filter
+    function renderApplications() {
+      const appTableBody = document.querySelector('#applications-table tbody');
+      const filterValue = document.getElementById('event-filter').value;
+      
+      const filteredApps = filterValue === 'all' 
+        ? allApplications 
+        : allApplications.filter(app => app.eventId === filterValue);
+        
+      document.getElementById('filtered-count').textContent = filteredApps.length;
+      
+      if (filteredApps.length > 0) {
+        appTableBody.innerHTML = '';
+        filteredApps.forEach(app => {
+          const row = document.createElement('tr');
+          
+          // Resolve Event Title
+          const eventInfo = eventsMap[app.eventId] || { title: 'Unknown Event / Legacy', driveLink: '#' };
+          
+          const eventCell = document.createElement('td');
+          eventCell.textContent = eventInfo.title;
+          row.appendChild(eventCell);
+
+          const nameCell = document.createElement('td');
+          nameCell.textContent = app.fullName || 'N/A';
+          row.appendChild(nameCell);
+
+          const ageCell = document.createElement('td');
+          ageCell.textContent = app.age !== undefined && app.age !== null ? app.age : 'N/A';
+          row.appendChild(ageCell);
+
+          const emailCell = document.createElement('td');
+          emailCell.textContent = app.email || 'N/A';
+          row.appendChild(emailCell);
+          
+          const discordCell = document.createElement('td');
+          discordCell.textContent = app.discordUsername || 'N/A';
+          row.appendChild(discordCell);
+
+          const phoneCell = document.createElement('td');
+          phoneCell.textContent = app.phone || 'N/A';
+          row.appendChild(phoneCell);
+          
+          const micCell = document.createElement('td');
+          micCell.textContent = app.hasWorkingMic === true ? 'Yes' : (app.hasWorkingMic === false ? 'No' : 'N/A');
+          row.appendChild(micCell);
+
+          const gameCell = document.createElement('td');
+          gameCell.textContent = app.game || 'N/A';
+          row.appendChild(gameCell);
+          
+          const ignCell = document.createElement('td');
+          ignCell.textContent = app.ign || 'N/A';
+          row.appendChild(ignCell);
+
+          const uidCell = document.createElement('td');
+          uidCell.textContent = app.uid || 'N/A';
+          row.appendChild(uidCell);
+          
+          const rankCell = document.createElement('td');
+          rankCell.textContent = app.rank || 'N/A';
+          row.appendChild(rankCell);
+
+          const deviceCell = document.createElement('td');
+          deviceCell.textContent = app.device || 'N/A';
+          row.appendChild(deviceCell);
+
+          const teamStatusCell = document.createElement('td');
+          teamStatusCell.textContent = app.teamStatus || 'N/A';
+          row.appendChild(teamStatusCell);
+
+          const teamNameCell = document.createElement('td');
+          teamNameCell.textContent = app.teamName || 'N/A';
+          row.appendChild(teamNameCell);
+
+          const whyCell = document.createElement('td');
+          whyCell.textContent = app.whySelect || 'N/A';
+          row.appendChild(whyCell);
+
+          const creatorCell = document.createElement('td');
+          if (app.creatorLink) {
+            const link = document.createElement('a');
+            link.href = app.creatorLink;
+            link.target = '_blank';
+            link.textContent = 'View Link';
+            creatorCell.appendChild(link);
+          } else {
+            creatorCell.textContent = 'N/A';
+          }
+          row.appendChild(creatorCell);
+
+          const secondaryCell = document.createElement('td');
+          secondaryCell.textContent = (app.secondaryGames && app.secondaryGames.length > 0) ? app.secondaryGames.join(', ') : 'None';
+          row.appendChild(secondaryCell);
+
+          const referralCell = document.createElement('td');
+          referralCell.textContent = app.referral || 'N/A';
+          row.appendChild(referralCell);
+
+          // Google Drive custom verification column
+          const driveVerificationCell = document.createElement('td');
+          
+          // Format expected filename: IGN_FullName.mp4 safely
+          let expectedFilename = 'N/A';
+          if (app.ign || app.fullName) {
+            const cleanIGN = (app.ign || '').replace(/[^a-zA-Z0-9]/g, '_') || 'PLAYERIGN';
+            const cleanName = (app.fullName || '').replace(/[^a-zA-Z0-9]/g, '_') || 'PLAYERNAME';
+            expectedFilename = `${cleanIGN}_${cleanName}.mp4`;
+          }
+          
+          const filenameSpan = document.createElement('strong');
+          filenameSpan.textContent = expectedFilename;
+          driveVerificationCell.appendChild(filenameSpan);
+          
+          driveVerificationCell.appendChild(document.createElement('br'));
+          
+          if (eventInfo.driveLink && eventInfo.driveLink !== '#') {
+            const folderLink = document.createElement('a');
+            folderLink.href = eventInfo.driveLink;
+            folderLink.target = '_blank';
+            folderLink.textContent = 'Open Drive Folder';
+            driveVerificationCell.appendChild(folderLink);
+          } else {
+            driveVerificationCell.appendChild(document.createTextNode('No folder configured'));
+          }
+          row.appendChild(driveVerificationCell);
+          
+          const dateCell = document.createElement('td');
+          dateCell.textContent = app.submittedAt ? new Date(app.submittedAt).toLocaleString() : 'N/A';
+          row.appendChild(dateCell);
+
+          // Status Cell
+          const statusCell = document.createElement('td');
+          const appStatus = app.status || 'Pending';
+          const statusSpan = document.createElement('span');
+          statusSpan.textContent = appStatus;
+          statusSpan.className = `badge ${appStatus === 'Shortlisted' ? 'badge-green' : 'badge-purple'}`;
+          statusCell.appendChild(statusSpan);
+          row.appendChild(statusCell);
+
+          // Actions Cell
+          const actionsCell = document.createElement('td');
+          if (appStatus !== 'Shortlisted') {
+            const shortlistBtn = document.createElement('button');
+            shortlistBtn.textContent = 'Shortlist 🏆';
+            shortlistBtn.type = 'button';
+            shortlistBtn.style.padding = '4px 8px';
+            shortlistBtn.style.fontSize = '12px';
+            shortlistBtn.style.cursor = 'pointer';
+            shortlistBtn.addEventListener('click', async () => {
+              if (!confirm(`Are you sure you want to shortlist ${app.fullName || 'this player'}?`)) {
+                return;
+              }
+              
+              try {
+                const res = await fetch(`/api/admin/applications/${app._id}/shortlist`, {
+                  method: 'PUT',
+                  headers: {
+                    'Authorization': `Bearer ${token}`
+                  }
+                });
+
+                if (res.ok) {
+                  alert('Player shortlisted successfully!');
+                  loadApplications(token);
+                } else {
+                  const errData = await res.json();
+                  alert(`Error: ${errData.message || 'Failed to shortlist'}`);
+                }
+              } catch (err) {
+                console.error(err);
+                alert('Network error occurred.');
+              }
+            });
+            actionsCell.appendChild(shortlistBtn);
+          } else {
+            actionsCell.textContent = 'No actions';
+            actionsCell.style.color = '#64748b';
+          }
+          row.appendChild(actionsCell);
+          
+          appTableBody.appendChild(row);
+        });
+      } else {
+        appTableBody.innerHTML = '<tr><td colspan="22">No applications found for this tournament.</td></tr>';
       }
     }
   </script>
