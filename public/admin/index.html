@@ -4,112 +4,156 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard - Beast Arena Gaming Network</title>
+  <link rel="stylesheet" href="/index.css?v=1.4">
   <link rel="stylesheet" href="/admin.css">
   <script src="/nav.js" defer></script>
 </head>
 <body>
 
-  <header>
-    <h1>Beast Arena Gaming Network - Control Panel</h1>
-    <p><strong>Administrator Oversight & System Operations</strong></p>
+  <!-- 1. Admin Authentication Page (Split Screen Layout) -->
+  <div id="admin-auth-container" class="auth-container" hidden>
+    <!-- Left Panel: Branding & Esports Aesthetic -->
+    <div class="auth-brand-side">
+      <div class="auth-brand-content">
+        <a href="/" class="auth-logo">
+          <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logo-grad-admin" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#7c3aed" />
+                <stop offset="100%" stop-color="#b814b8" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(192, 132, 252, 0.15)" stroke-width="6" />
+            <polygon points="50,12 83,31 83,69 50,88 17,69 17,31" fill="none" stroke="url(#logo-grad-admin)" stroke-width="4" stroke-linejoin="round" />
+            <g fill="url(#logo-grad-admin)">
+              <path d="M35,32 L45,45 L32,52 L28,40 Z" />
+              <path d="M65,32 L72,40 L68,52 L55,45 Z" />
+              <path d="M50,25 L58,42 L50,55 L42,42 Z" />
+              <path d="M42,60 L50,52 L58,60 L50,75 Z" />
+            </g>
+          </svg>
+          <div class="logo-text">
+            <h1>Beast Arena</h1>
+            <p>Gaming Network</p>
+          </div>
+        </a>
+        
+        <div class="auth-brand-promo">
+          <h2>Administrator Portal.</h2>
+          <p>Access the control panel to operationalize events, manage players, audit database status, and monitor registrations.</p>
+        </div>
+        
+        <div class="auth-brand-footer">
+          <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
     
-    <!-- Admin Navigation Links (Only shown when authenticated) -->
-    <nav id="admin-nav" hidden>
-      <ul>
-        <li><a href="/admin">Dashboard Home</a></li>
-        <li><a href="/admin/create-event">Create Tournament</a></li>
-        <li><a href="/admin/events">Current Tournaments</a></li>
-        <li><a href="/admin/users">View User Accounts</a></li>
-        <li><a href="/admin/applications">View Player Applications</a></li>
-        <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
-      </ul>
-    </nav>
-  </header>
-
-  <main>
-    <hr>
-
-    <!-- 1. Admin Login Form View -->
-    <section id="admin-login-section">
-      <h2>Admin Authentication</h2>
-      <p>Please log in with the administrator credentials to access the registration database.</p>
+    <!-- Right Panel: Centered Admin Login Form -->
+    <div class="auth-form-side">
+      <div class="auth-back-link">
+        <a href="/">← Back to Home</a>
+      </div>
       
-      <form id="admin-login-form">
-        <fieldset>
-          <legend>Administrator Login</legend>
-          <p>
-            <label for="admin-username">Username:</label><br>
-            <input type="text" id="admin-username" required placeholder="admin">
-          </p>
-          <p>
-            <label for="admin-password">Password:</label><br>
-            <input type="password" id="admin-password" required placeholder="••••••••">
-          </p>
-          <p>
-            <button type="submit">Access Database</button>
-          </p>
-        </fieldset>
-      </form>
+      <div class="auth-card">
+        <h2>Admin Oversight</h2>
+        <p class="auth-subtitle">Log in with the system administrator credentials to access operations.</p>
+        
+        <form id="admin-login-form">
+          <div class="form-group">
+            <label for="admin-username">Username</label>
+            <input type="text" id="admin-username" required placeholder="admin" style="width: 100%;">
+          </div>
+          
+          <div class="form-group" style="margin-top:1.25rem;">
+            <label for="admin-password">Password</label>
+            <input type="password" id="admin-password" required placeholder="••••••••" style="width: 100%;">
+          </div>
+          
+          <button type="submit" class="auth-submit-btn" style="margin-top:1.5rem; width:100%;">Access Control Panel</button>
+        </form>
 
-      <!-- OTP Form (Hidden by default) -->
-      <form id="admin-otp-form" hidden>
-        <fieldset>
-          <legend>OTP Verification Required</legend>
-          <p style="font-size: 0.9rem; color: #475569; margin: 0 0 1rem;">A 6-digit verification code has been generated and sent to the administrator's email.</p>
-          <p>
-            <label for="admin-otp">Enter OTP Code:</label><br>
-            <input type="text" id="admin-otp" required placeholder="123456" pattern="\d{6}" maxlength="6" style="letter-spacing: 0.2em; text-align: center; font-size: 1.1rem; font-weight: bold; max-width: 160px; font-family: monospace; margin-top: 0.25rem;">
-          </p>
-          <p style="margin-top: 1rem;">
-            <button type="submit">Verify & Login</button>
-            <button type="button" id="cancel-otp-btn" style="background:#64748b; margin-left: 0.5rem;">Cancel</button>
-          </p>
-        </fieldset>
-      </form>
+        <!-- OTP Verification Form (Hidden by default) -->
+        <form id="admin-otp-form" hidden>
+          <p style="font-size: 0.9rem; color: var(--fg-muted); margin: 0 0 1rem; line-height: 1.5;">A 6-digit verification code has been generated and sent to the administrator's email.</p>
+          
+          <div class="form-group">
+            <label for="admin-otp">Enter OTP Code</label>
+            <input type="text" id="admin-otp" required placeholder="123456" pattern="\d{6}" maxlength="6" style="letter-spacing: 0.25em; text-align: center; font-size: 1.25rem; font-weight: bold; width: 100%; font-family: monospace;">
+          </div>
+          
+          <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+            <button type="submit" class="auth-submit-btn" style="flex: 1;">Verify & Login</button>
+            <button type="button" id="cancel-otp-btn" class="auth-submit-btn" style="background:#64748b; flex: 1;">Cancel</button>
+          </div>
+        </form>
+        
+        <p id="admin-login-message" style="margin-top:1.25rem; text-align:center; font-weight:600; font-size:0.875rem; min-height: 20px;"></p>
+      </div>
+    </div>
+  </div>
 
-      <p id="admin-login-message" style="font-weight: 600; margin-top: 1rem;"></p>
-    </section>
-
-    <!-- 2. Admin Secure Dashboard Home View (Hidden by default) -->
-    <section id="admin-dashboard-section" hidden>
-      <h2>System Diagnostics & Statistics</h2>
-      <p>Welcome, Administrator. Select an option from the navigation bar above or review the system counters below.</p>
-
-      <fieldset style="margin-bottom: 1.5rem;">
-        <legend>Database & Platform Status</legend>
+  <!-- 2. Admin Secure Dashboard Page -->
+  <div id="admin-dashboard-wrapper" hidden>
+    <header>
+      <h1>Beast Arena Gaming Network - Control Panel</h1>
+      <p><strong>Administrator Oversight & System Operations</strong></p>
+      
+      <!-- Admin Navigation Links (Only shown when authenticated) -->
+      <nav id="admin-nav">
         <ul>
-          <li><strong>Database Status:</strong> <span id="status-db">Checking...</span></li>
-          <li><strong>Total Registered Users:</strong> <span id="status-users">Checking...</span></li>
-          <li><strong>Total Tournament Applications:</strong> <span id="status-apps">Checking...</span></li>
-          <li><strong>Total Created Tournaments:</strong> <span id="status-events">Checking...</span></li>
+          <li><a href="/admin">Dashboard Home</a></li>
+          <li><a href="/admin/create-event">Create Tournament</a></li>
+          <li><a href="/admin/events">Current Tournaments</a></li>
+          <li><a href="/admin/users">View User Accounts</a></li>
+          <li><a href="/admin/applications">View Player Applications</a></li>
+          <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
         </ul>
-        <p><button id="refresh-status-btn" type="button">Refresh Diagnostics</button></p>
-      </fieldset>
+      </nav>
+    </header>
 
-      <!-- System Maintenance Panel -->
-      <fieldset style="border-color: #dc2626; margin-bottom: 1.5rem;">
-        <legend style="color: #dc2626; font-weight: bold;">System Maintenance & Danger Zone</legend>
-        <p style="font-size: 0.9rem; color: #4b5563; margin-top: 0;">Resetting all details will permanently delete all player user accounts, tournament application records, and created events from the platform database.</p>
-        <p>
-          <button id="reset-db-btn" type="button" style="background-color: #dc2626; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem;">
-            Reset All Details & Clear Database ⚠️
-          </button>
-        </p>
-        <p id="reset-status-msg" style="font-weight: bold; margin-top: 0.5rem;"></p>
-      </fieldset>
-    </section>
+    <main>
+      <hr>
 
-    <hr>
-  </main>
+      <section id="admin-dashboard-section">
+        <h2>System Diagnostics & Statistics</h2>
+        <p>Welcome, Administrator. Select an option from the navigation bar above or review the system counters below.</p>
 
-  <footer>
-    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
-  </footer>
+        <fieldset style="margin-bottom: 1.5rem;">
+          <legend>Database & Platform Status</legend>
+          <ul>
+            <li><strong>Database Status:</strong> <span id="status-db">Checking...</span></li>
+            <li><strong>Total Registered Users:</strong> <span id="status-users">Checking...</span></li>
+            <li><strong>Total Tournament Applications:</strong> <span id="status-apps">Checking...</span></li>
+            <li><strong>Total Created Tournaments:</strong> <span id="status-events">Checking...</span></li>
+          </ul>
+          <p><button id="refresh-status-btn" type="button">Refresh Diagnostics</button></p>
+        </fieldset>
+
+        <!-- System Maintenance Panel -->
+        <fieldset style="border-color: #dc2626; margin-bottom: 1.5rem;">
+          <legend style="color: #dc2626; font-weight: bold;">System Maintenance & Danger Zone</legend>
+          <p style="font-size: 0.9rem; color: #4b5563; margin-top: 0;">Resetting all details will permanently delete all player user accounts, tournament application records, and created events from the platform database.</p>
+          <p>
+            <button id="reset-db-btn" type="button" style="background-color: #dc2626; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem;">
+              Reset All Details & Clear Database ⚠️
+            </button>
+          </p>
+          <p id="reset-status-msg" style="font-weight: bold; margin-top: 0.5rem;"></p>
+        </fieldset>
+      </section>
+
+      <hr>
+    </main>
+
+    <footer>
+      <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
+    </footer>
+  </div>
 
   <script>
-    const loginSection = document.getElementById('admin-login-section');
-    const dashboardSection = document.getElementById('admin-dashboard-section');
-    const adminNav = document.getElementById('admin-nav');
+    const authContainer = document.getElementById('admin-auth-container');
+    const dashboardWrapper = document.getElementById('admin-dashboard-wrapper');
     const loginForm = document.getElementById('admin-login-form');
     const otpForm = document.getElementById('admin-otp-form');
     const cancelOtpBtn = document.getElementById('cancel-otp-btn');
@@ -131,9 +175,9 @@
 
     function showLogin() {
       localStorage.removeItem('adminToken');
-      loginSection.removeAttribute('hidden');
-      dashboardSection.setAttribute('hidden', '');
-      adminNav.setAttribute('hidden', '');
+      document.body.classList.add('auth-page');
+      authContainer.removeAttribute('hidden');
+      dashboardWrapper.setAttribute('hidden', '');
       
       loginForm.removeAttribute('hidden');
       otpForm.setAttribute('hidden', '');
@@ -142,9 +186,9 @@
     }
 
     function showDashboard() {
-      loginSection.setAttribute('hidden', '');
-      dashboardSection.removeAttribute('hidden');
-      adminNav.removeAttribute('hidden');
+      document.body.classList.remove('auth-page');
+      authContainer.setAttribute('hidden', '');
+      dashboardWrapper.removeAttribute('hidden');
       loadStatus();
     }
 
@@ -152,7 +196,7 @@
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       loginMessage.textContent = 'Authenticating credentials...';
-      loginMessage.style.color = '#4f46e5';
+      loginMessage.style.color = '#7c3aed';
 
       const username = document.getElementById('admin-username').value;
       const password = document.getElementById('admin-password').value;
@@ -200,7 +244,7 @@
     otpForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       loginMessage.textContent = 'Verifying OTP code...';
-      loginMessage.style.color = '#4f46e5';
+      loginMessage.style.color = '#7c3aed';
 
       const otp = document.getElementById('admin-otp').value;
 
