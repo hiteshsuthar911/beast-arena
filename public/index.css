@@ -309,7 +309,7 @@ hr {
 }
 
 /* ── Cards / Sections ─────────────────────────────────────────── */
-.card, section {
+.card {
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -318,9 +318,13 @@ hr {
   box-shadow: var(--card-shadow);
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
 }
-.card:hover, section:hover {
+.card:hover {
   border-color: var(--border-hover);
   box-shadow: var(--card-hover-shadow);
+}
+section {
+  margin-bottom: 3.5rem;
+  position: relative;
 }
 
 /* ── Typography ───────────────────────────────────────────────── */
@@ -1383,9 +1387,7 @@ footer a:hover { color: var(--accent2); }
   background: var(--bg2);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  border-radius: var(--radius-lg);
   margin-top: 1.5rem;
-  box-shadow: var(--card-shadow);
   display: flex;
 }
 .game-marquee-container::before,
