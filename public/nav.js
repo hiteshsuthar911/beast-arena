@@ -28,22 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.innerHTML = `
       <div class="verification-content">
         <div class="verification-logo-row" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
-          <svg class="logo-svg" style="width: 48px; height: 48px;" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="logo-grad-ver" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#7c3aed" />
-                <stop offset="100%" stop-color="#b814b8" />
-              </linearGradient>
-            </defs>
-            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(192, 132, 252, 0.15)" stroke-width="6" />
-            <polygon points="50,12 83,31 83,69 50,88 17,69 17,31" fill="none" stroke="url(#logo-grad-ver)" stroke-width="4" stroke-linejoin="round" />
-            <g fill="url(#logo-grad-ver)">
-              <path d="M35,32 L45,45 L32,52 L28,40 Z" />
-              <path d="M65,32 L72,40 L68,52 L55,45 Z" />
-              <path d="M50,25 L58,42 L50,55 L42,42 Z" />
-              <path d="M42,60 L50,52 L58,60 L50,75 Z" />
-            </g>
-          </svg>
+          <img src="/beastarena.png" alt="Beast Arena Logo" class="logo-svg" style="width: 48px; height: 48px; object-fit: contain;">
           <div style="display: flex; flex-direction: column;">
             <span style="font-size: 1.35rem; font-weight: 850; color: #ffffff; letter-spacing: -0.03em; line-height: 1.1;">Beast Arena</span>
             <span style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; line-height: 1;">Security Center</span>
