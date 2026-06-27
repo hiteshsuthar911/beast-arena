@@ -274,6 +274,11 @@
             resetDbBtn.disabled = false;
           }, 3000);
         } else {
+          if (response.status === 401) {
+            alert('Session expired. Please log in again.');
+            showLogin();
+            return;
+          }
           resetStatusMsg.textContent = 'Error: ' + (data.message || 'Failed to reset database.');
           resetStatusMsg.style.color = '#dc2626';
           resetDbBtn.disabled = false;
