@@ -1422,22 +1422,9 @@ footer a:hover { color: var(--accent2); }
   flex-shrink: 0;
 }
 .game-logo-img {
-  height: 42px;
-  max-width: 170px;
+  height: 45px;
+  max-width: 180px;
   object-fit: contain;
-  filter: brightness(0) opacity(0.35);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.game-marquee-item:hover .game-logo-img {
-  filter: none;
-  transform: translateY(-2px) scale(1.03);
-}
-[data-theme="dark"] .game-logo-img {
-  filter: brightness(0) invert(1) opacity(0.35);
-}
-[data-theme="dark"] .game-marquee-item:hover .game-logo-img {
-  filter: brightness(0) invert(1) opacity(1.0);
-  transform: translateY(-2px) scale(1.03);
 }
 @keyframes scrollMarquee {
   0% {
