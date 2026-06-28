@@ -473,6 +473,13 @@
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
+        if (response.status === 401) {
+          showLogin();
+          loginMessage.textContent = 'Session expired. Please log in again.';
+          loginMessage.style.color = '#dc2626';
+          return;
+        }
+        
         const data = await response.json();
         if (response.ok && data.success) {
           document.getElementById('razorpay-key-id').value = data.config.razorpayKeyId || '';
