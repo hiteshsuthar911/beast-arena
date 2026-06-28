@@ -438,6 +438,20 @@ input[type="checkbox"], input[type="radio"] {
   overflow-x: auto; border: 1px solid #e2e8f0;
   border-radius: 8px; background: #fff; margin-top: 1rem;
 }
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+.table-container::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 4px;
+}
+.table-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
 table    { width: 100%; border-collapse: collapse; text-align: left; }
 th, td   { padding: 0.65rem 0.9rem; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem; }
 th       { background: #f8fafc; font-weight: 600; color: #475569; white-space: nowrap; }
