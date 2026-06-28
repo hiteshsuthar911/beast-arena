@@ -535,7 +535,7 @@
           playerApplications = d.applications;
           document.getElementById('stat-apps').textContent = d.applications.length;
           d.applications.forEach(app => {
-            const title = eventsMap[app.eventId] || 'Minecraft: Island Survival';
+            const title = app.eventTitle || 'Minecraft: Island Survival';
             const tr = document.createElement('tr');
             
             const payStatus = app.paymentStatus || 'Unpaid';
@@ -573,7 +573,7 @@
       const app = playerApplications.find(a => a._id === appId);
       if (!app) return;
       
-      const title = eventsMap[app.eventId] || 'Tournament Event';
+      const title = app.eventTitle || 'Tournament Event';
       
       document.getElementById('inv-payment-id').textContent = app.razorpayPaymentId || 'N/A';
       document.getElementById('inv-date').textContent = app.paidAt ? new Date(app.paidAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date(app.submittedAt).toLocaleDateString('en-IN');
@@ -591,8 +591,6 @@
       
       document.getElementById('invoice-modal').style.display = 'flex';
     };
-      } catch { tbody.innerHTML = '<tr><td colspan="4">Error loading applications.</td></tr>'; }
-    }
   </script>
 </body>
 </html>
