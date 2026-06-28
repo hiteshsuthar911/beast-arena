@@ -21,6 +21,12 @@ const EventApplicationSchema = new mongoose.Schema({
   referral: { type: String },
   agreedToTerms: { type: Boolean },
   status: { type: String, enum: ['Pending', 'Shortlisted', 'Rejected'], default: 'Pending' },
+  paymentStatus: { type: String, enum: ['Unpaid', 'Pending', 'Paid'], default: 'Unpaid' },
+  razorpayOrderId: { type: String },
+  razorpayPaymentId: { type: String },
+  razorpaySignature: { type: String },
+  paidAmount: { type: Number },
+  paidAt: { type: Date },
   submittedAt: { type: Date, default: Date.now }
 });
 

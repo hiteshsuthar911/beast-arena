@@ -18,6 +18,7 @@
         <li><a href="/admin">Dashboard Home</a></li>
         <li><a href="/admin/create-event">Create Tournament</a></li>
         <li><a href="/admin/events">Current Tournaments</a></li>
+        <li><a href="/admin/advertisements">Manage Ads</a></li>
         <li><a href="/admin/users">View User Accounts</a></li>
         <li><a href="/admin/applications">View Player Applications</a></li>
         <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
@@ -40,6 +41,7 @@
               <th>Title</th>
               <th>Game</th>
               <th>Prize Pool</th>
+              <th>Entry Fee</th>
               <th>Max Players</th>
               <th>Google Drive Folder</th>
               <th>Status</th>
@@ -50,7 +52,7 @@
           </thead>
           <tbody>
             <tr>
-              <td colspan="9">Loading events database...</td>
+              <td colspan="10">Loading events database...</td>
             </tr>
           </tbody>
         </table>
@@ -117,6 +119,10 @@
             const prizeCell = document.createElement('td');
             prizeCell.textContent = `₹${evt.prizePool.toLocaleString()}`;
             row.appendChild(prizeCell);
+
+            const feeCell = document.createElement('td');
+            feeCell.textContent = evt.isPaid ? `₹${evt.entryFee}` : 'Free';
+            row.appendChild(feeCell);
 
             const limitCell = document.createElement('td');
             limitCell.textContent = evt.maxPlayers;
@@ -189,16 +195,52 @@
               });
               actionCell.appendChild(closeBtn);
             }
+
+            // Delete Event Button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete 🗑️';
+            deleteBtn.type = 'button';
+            deleteBtn.style.padding = '4px 8px';
+            deleteBtn.style.fontSize = '12px';
+            deleteBtn.style.cursor = 'pointer';
+            deleteBtn.style.background = '#ef4444';
+            deleteBtn.style.color = 'white';
+            deleteBtn.style.border = 'none';
+            deleteBtn.style.borderRadius = '4px';
+            deleteBtn.style.marginLeft = '6px';
+            deleteBtn.addEventListener('click', async () => {
+              if (confirm(`WARNING: Are you sure you want to delete "${evt.title}"?\nThis will permanently delete the event AND ALL registration applications linked to it!`)) {
+                try {
+                  const res = await fetch(`/api/admin/events/${evt._id}`, {
+                    method: 'DELETE',
+                    headers: {
+                      'Authorization': `Bearer ${token}`
+                    }
+                  });
+                  const resData = await res.json();
+                  if (resData.success) {
+                    alert(resData.message);
+                    loadEvents(token);
+                  } else {
+                    alert('Error: ' + resData.message);
+                  }
+                } catch (err) {
+                  console.error('Error deleting event:', err);
+                  alert('Failed to delete event.');
+                }
+              }
+            });
+            actionCell.appendChild(deleteBtn);
             row.appendChild(actionCell);
 
             eventsTableBody.appendChild(row);
           });
         } else {
-          eventsTableBody.innerHTML = '<tr><td colspan="9">No tournaments created yet.</td></tr>';
+          eventsTableBody.innerHTML = '<tr><td colspan="10">No tournaments created yet.</td></tr>';
         }
       } catch (error) {
         console.error('Failed to load events:', error);
-        eventsTableBody.innerHTML = '<tr><td colspan="9">Error loading tournament list.</td></tr>';
+        eventsTableBody.innerHTML = '<tr><td colspan="10">Error loading tournament list.</td></tr>';
       }
     }
   </script>

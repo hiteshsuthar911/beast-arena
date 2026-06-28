@@ -57,6 +57,10 @@ router.get('/admin/applications', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'admin', 'applications.html'));
 });
 
+router.get('/admin/advertisements', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'admin', 'advertisements.html'));
+});
+
 // Fallback to custom 404 page
 router.get('*', (req, res) => {
   res.status(404).sendFile(path.join(__dirname, '..', 'public', '404.html'));

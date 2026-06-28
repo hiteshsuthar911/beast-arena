@@ -152,8 +152,8 @@
       <p>Track all your submitted applications below.</p>
       <div class="table-container">
         <table id="history-table">
-          <thead><tr><th>Tournament</th><th>IGN</th><th>Video File</th><th>Date</th></tr></thead>
-          <tbody><tr><td colspan="4">Loading…</td></tr></tbody>
+          <thead><tr><th>Tournament</th><th>IGN</th><th>Date</th><th>Payment Status</th><th>Receipt Invoice</th></tr></thead>
+          <tbody><tr><td colspan="5">Loading…</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -164,9 +164,248 @@
     <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/">Back to Home Page</a> | <a href="/admin">Admin Panel</a></p>
   </footer>
 
+  <!-- Invoice/Slip Modal overlay -->
+  <div id="invoice-modal" class="invoice-modal-overlay" style="display: none;">
+    <div class="invoice-modal-card">
+      <div class="invoice-header">
+        <div class="invoice-brand">
+          <img src="/beastarena.png" alt="Beast Arena" class="invoice-logo">
+          <div>
+            <h3>Beast Arena</h3>
+            <p>Gaming Network</p>
+          </div>
+        </div>
+        <div class="invoice-meta-right">
+          <h2>RECEIPT</h2>
+          <p><strong>Receipt #:</strong> <span id="inv-payment-id">pay_123456</span></p>
+          <p><strong>Date:</strong> <span id="inv-date">28 June 2026</span></p>
+        </div>
+      </div>
+      
+      <hr class="invoice-hr">
+      
+      <div class="invoice-billing-details">
+        <div class="inv-billing-col">
+          <strong>BILL FROM:</strong>
+          <p>Beast Arena Gaming Network Ltd.<br>E-Esports Hub, Sector 5<br>Jaipur, Rajasthan, India<br>support@beastarena.com</p>
+        </div>
+        <div class="inv-billing-col">
+          <strong>BILL TO:</strong>
+          <p><span id="inv-player-name">John Doe</span><br>Email: <span id="inv-player-email">john@example.com</span><br>Phone: <span id="inv-player-phone">+91 9876543210</span></p>
+        </div>
+      </div>
+      
+      <table class="invoice-items-table">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th style="text-align: right;">Amount (INR)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <strong>Tournament Entry Fee</strong><br>
+              <small id="inv-tournament-title">PUBG Mobile Ultimate Showdown</small>
+            </td>
+            <td style="text-align: right;" id="inv-amount">₹150.00</td>
+          </tr>
+          <tr class="inv-summary-row">
+            <td>Subtotal:</td>
+            <td style="text-align: right;" id="inv-subtotal">₹150.00</td>
+          </tr>
+          <tr class="inv-summary-row" style="font-weight: bold; border-top: 1px solid #e2e8f0; font-size: 1.05rem;">
+            <td>Total paid (incl. taxes):</td>
+            <td style="text-align: right; color: #16a34a;" id="inv-total">₹150.00</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="invoice-footer">
+        <p><strong>Transaction Order ID:</strong> <span id="inv-order-id">order_ABC123</span></p>
+        <p>Thank you for competing in the Beast Arena! This is a system-generated secure payment invoice confirming your slot registration. No signature required.</p>
+        
+        <div class="invoice-actions no-print" style="margin-top: 2rem; display: flex; gap: 1rem;">
+          <button id="inv-print-btn" class="inv-btn" style="background: #4f46e5; color: white;">Download PDF / Print 🖨️</button>
+          <button id="inv-close-btn" class="inv-btn" style="background: #64748b; color: white;">Close ❌</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Invoice Modal Styles */
+    .invoice-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      padding: 1.5rem;
+    }
+    .invoice-modal-card {
+      background: #ffffff;
+      color: #1e293b;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 650px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      padding: 2.5rem;
+      font-family: 'Inter', sans-serif;
+      box-sizing: border-box;
+      border: 1px solid #cbd5e1;
+    }
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .invoice-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .invoice-brand h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .invoice-brand p {
+      margin: 0;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #64748b;
+      font-weight: 750;
+    }
+    .invoice-logo {
+      width: 38px;
+      height: 38px;
+    }
+    .invoice-meta-right {
+      text-align: right;
+    }
+    .invoice-meta-right h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.5rem;
+      letter-spacing: 0.05em;
+      color: #4f46e5;
+    }
+    .invoice-meta-right p {
+      margin: 0 0 0.2rem 0;
+      font-size: 0.85rem;
+      color: #475569;
+    }
+    .invoice-hr {
+      border: 0;
+      border-top: 1px solid #e2e8f0;
+      margin: 1.5rem 0;
+    }
+    .invoice-billing-details {
+      display: flex;
+      justify-content: space-between;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    .inv-billing-col {
+      flex: 1;
+      font-size: 0.85rem;
+    }
+    .inv-billing-col strong {
+      display: block;
+      color: #64748b;
+      margin-bottom: 0.5rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    .inv-billing-col p {
+      margin: 0;
+      line-height: 1.5;
+      color: #334155;
+    }
+    .invoice-items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+    .invoice-items-table th {
+      background: #f8fafc;
+      border-bottom: 2px solid #e2e8f0;
+      padding: 0.75rem;
+      text-align: left;
+      color: #475569;
+      font-weight: 600;
+    }
+    .invoice-items-table td {
+      padding: 1rem 0.75rem;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    .inv-summary-row td {
+      border: 0;
+      padding: 0.5rem 0.75rem;
+      text-align: right;
+    }
+    .inv-summary-row td:first-child {
+      color: #64748b;
+    }
+    .invoice-footer {
+      font-size: 0.75rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    .invoice-footer p {
+      margin: 0 0 0.5rem 0;
+    }
+    .inv-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #invoice-modal, #invoice-modal * {
+        visibility: visible;
+      }
+      #invoice-modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        padding: 0;
+      }
+      .invoice-modal-card {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+
   <script>
     const PKEY = 'beastArenaProfile';
     let eventsMap = {}, selectedRank = '';
+    let playerApplications = [];
+
+    // Decode email
+    // ... rest as before but we reference window.viewInvoice
 
     document.addEventListener('DOMContentLoaded', async () => {
       const token = localStorage.getItem('playerToken');
@@ -236,6 +475,13 @@
         toast('✅ Profile saved!');
       });
 
+      document.getElementById('inv-close-btn').addEventListener('click', () => {
+        document.getElementById('invoice-modal').style.display = 'none';
+      });
+      document.getElementById('inv-print-btn').addEventListener('click', () => {
+        window.print();
+      });
+
       await loadEventsMap(); loadApps(token);
     });
 
@@ -286,18 +532,65 @@
         const d = await r.json();
         if (d.success && d.applications.length > 0) {
           tbody.innerHTML = '';
+          playerApplications = d.applications;
           document.getElementById('stat-apps').textContent = d.applications.length;
           d.applications.forEach(app => {
             const title = eventsMap[app.eventId] || 'Minecraft: Island Survival';
-            const file = (app.ign && app.fullName) ? `${app.ign.replace(/[^a-zA-Z0-9]/g,'_')}_${app.fullName.replace(/[^a-zA-Z0-9]/g,'_')}.mp4` : 'N/A';
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${title}</td><td>${app.ign||'N/A'}</td><td><code>${file}</code></td><td>${app.submittedAt ? new Date(app.submittedAt).toLocaleDateString('en-IN') : 'N/A'}</td>`;
+            
+            const payStatus = app.paymentStatus || 'Unpaid';
+            let payBadgeHtml = '';
+            let invoiceBtnHtml = '';
+            
+            if (payStatus === 'Paid') {
+              payBadgeHtml = `<span class="badge badge-green">Paid</span>`;
+              invoiceBtnHtml = `<button class="btn btn-ghost" style="padding: 2px 8px; font-size: 0.8rem; cursor: pointer; color: #4f46e5; border-color: #4f46e5;" onclick="viewInvoice('${app._id}')">View Slip 📄</button>`;
+            } else {
+              payBadgeHtml = `<span class="badge badge-gray">${payStatus}</span>`;
+              invoiceBtnHtml = `<span style="color: #94a3b8; font-size: 0.85rem;">N/A</span>`;
+            }
+
+            tr.innerHTML = `
+              <td>${title}</td>
+              <td>${app.ign||'N/A'}</td>
+              <td>${app.submittedAt ? new Date(app.submittedAt).toLocaleDateString('en-IN') : 'N/A'}</td>
+              <td>${payBadgeHtml}</td>
+              <td>${invoiceBtnHtml}</td>
+            `;
             tbody.appendChild(tr);
           });
         } else {
           document.getElementById('stat-apps').textContent = '0';
-          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">No applications yet. <a href="/register">Apply now →</a></td></tr>';
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;">No applications yet. <a href="/register">Apply now →</a></td></tr>';
         }
+      } catch (error) {
+        console.error('Failed to load applications:', error);
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;">Error loading application history.</td></tr>';
+      }
+    }
+
+    window.viewInvoice = function(appId) {
+      const app = playerApplications.find(a => a._id === appId);
+      if (!app) return;
+      
+      const title = eventsMap[app.eventId] || 'Tournament Event';
+      
+      document.getElementById('inv-payment-id').textContent = app.razorpayPaymentId || 'N/A';
+      document.getElementById('inv-date').textContent = app.paidAt ? new Date(app.paidAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date(app.submittedAt).toLocaleDateString('en-IN');
+      document.getElementById('inv-player-name').textContent = app.fullName || 'Player';
+      document.getElementById('inv-player-email').textContent = app.email || 'N/A';
+      document.getElementById('inv-player-phone').textContent = app.phone || 'N/A';
+      document.getElementById('inv-tournament-title').textContent = title;
+      
+      const amtStr = `₹${(app.paidAmount || 0).toLocaleString('en-IN')}.00`;
+      document.getElementById('inv-amount').textContent = amtStr;
+      document.getElementById('inv-subtotal').textContent = amtStr;
+      document.getElementById('inv-total').textContent = amtStr;
+      
+      document.getElementById('inv-order-id').textContent = app.razorpayOrderId || 'N/A';
+      
+      document.getElementById('invoice-modal').style.display = 'flex';
+    };
       } catch { tbody.innerHTML = '<tr><td colspan="4">Error loading applications.</td></tr>'; }
     }
   </script>

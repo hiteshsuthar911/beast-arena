@@ -18,6 +18,7 @@
         <li><a href="/admin">Dashboard Home</a></li>
         <li><a href="/admin/create-event">Create Tournament</a></li>
         <li><a href="/admin/events">Current Tournaments</a></li>
+        <li><a href="/admin/advertisements">Manage Ads</a></li>
         <li><a href="/admin/users">View User Accounts</a></li>
         <li><a href="/admin/applications">View Player Applications</a></li>
         <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
@@ -65,6 +66,16 @@
           <p>
             <label for="event-closes-at">Registration Closing Date & Time (Optional):</label><br>
             <input type="datetime-local" id="event-closes-at">
+          </p>
+
+          <p>
+            <label for="event-is-paid">Require Entry Fee / Online Payment:</label>
+            <input type="checkbox" id="event-is-paid" style="margin-left: 0.5rem; width: auto; vertical-align: middle;">
+          </p>
+
+          <p id="entry-fee-container" style="display: none;">
+            <label for="event-entry-fee">Entry Fee Amount (INR ₹):</label><br>
+            <input type="number" id="event-entry-fee" placeholder="0" min="0">
           </p>
 
           <p>
@@ -131,6 +142,22 @@
         window.location.href = '/admin';
         return;
       }
+
+      // Toggle Entry Fee Container display
+      const isPaidCheckbox = document.getElementById('event-is-paid');
+      const entryFeeContainer = document.getElementById('entry-fee-container');
+      const entryFeeInput = document.getElementById('event-entry-fee');
+      
+      isPaidCheckbox.addEventListener('change', () => {
+        if (isPaidCheckbox.checked) {
+          entryFeeContainer.style.display = 'block';
+          entryFeeInput.required = true;
+        } else {
+          entryFeeContainer.style.display = 'none';
+          entryFeeInput.required = false;
+          entryFeeInput.value = '';
+        }
+      });
     });
 
     // Handle Log Out
@@ -154,6 +181,9 @@
       const rules = document.getElementById('event-rules').value;
       const closesAt = document.getElementById('event-closes-at').value || null;
 
+      const isPaid = document.getElementById('event-is-paid').checked;
+      const entryFee = isPaid ? document.getElementById('event-entry-fee').value : 0;
+
       const registrationFields = [];
       document.querySelectorAll('input[name="registrationFields"]:checked').forEach(cb => {
         registrationFields.push(cb.value);
@@ -166,7 +196,7 @@
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ title, gameTitle, prizePool, maxPlayers, driveLink, status, rules, registrationFields, closesAt })
+          body: JSON.stringify({ title, gameTitle, prizePool, maxPlayers, driveLink, status, rules, registrationFields, closesAt, isPaid, entryFee })
         });
 
         const data = await response.json();
@@ -174,6 +204,7 @@
         if (response.ok && data.success) {
           formMessage.textContent = `Success: ${data.message}`;
           createForm.reset();
+          document.getElementById('entry-fee-container').style.display = 'none';
         } else {
           formMessage.textContent = `Error: ${data.message}`;
           if (response.status === 401) {

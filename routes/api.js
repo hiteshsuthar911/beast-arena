@@ -5,6 +5,8 @@ const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const Event = require('../models/Event');
 const EventApplication = require('../models/EventApplication');
+const PaymentConfig = require('../models/PaymentConfig');
+const Advertisement = require('../models/Advertisement');
 const { verifyAdminToken, verifyPlayerToken } = require('../middleware/auth');
 
 const router = express.Router();
@@ -163,7 +165,13 @@ const allRegistrationFields = [
 const mockDb = global.mockDb || {
   users: [],
   applications: [],
-  events: []
+  events: [],
+  advertisements: [],
+  paymentConfig: {
+    razorpayKeyId: '',
+    razorpayKeySecret: '',
+    isPaymentEnabled: true
+  }
 };
 global.mockDb = mockDb;
 
@@ -483,6 +491,44 @@ router.post('/events/register', verifyPlayerToken, async (req, res) => {
       agreedToTerms: req.body.agreedToTerms === 'true' || req.body.agreedToTerms === true
     };
 
+    if (event.isPaid && event.entryFee > 0) {
+      const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+      if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+        return res.status(400).json({ success: false, message: 'Payment verification details are required for this tournament.' });
+      }
+
+      // Fetch Secret to verify
+      let keySecret = process.env.RAZORPAY_KEY_SECRET;
+      if (isConnected()) {
+        const config = await PaymentConfig.findOne({});
+        if (config && config.razorpayKeySecret) keySecret = config.razorpayKeySecret;
+      } else {
+        if (mockDb.paymentConfig.razorpayKeySecret) keySecret = mockDb.paymentConfig.razorpayKeySecret;
+      }
+
+      if (!keySecret) {
+        return res.status(400).json({ success: false, message: 'Razorpay keys not configured. Verification failed.' });
+      }
+
+      const generatedSignature = crypto
+        .createHmac('sha256', keySecret)
+        .update(razorpayOrderId + '|' + razorpayPaymentId)
+        .digest('hex');
+
+      if (generatedSignature !== razorpaySignature) {
+        return res.status(400).json({ success: false, message: 'Invalid payment signature. Transaction verification failed.' });
+      }
+
+      appData.paymentStatus = 'Paid';
+      appData.razorpayOrderId = razorpayOrderId;
+      appData.razorpayPaymentId = razorpayPaymentId;
+      appData.razorpaySignature = razorpaySignature;
+      appData.paidAmount = event.entryFee;
+      appData.paidAt = new Date();
+    } else {
+      appData.paymentStatus = 'Unpaid';
+    }
+
     if (isConnected()) {
       const application = new EventApplication(appData);
       await application.save();
@@ -665,7 +711,7 @@ router.get('/player/applications', verifyPlayerToken, async (req, res) => {
 
 // 7. Protected Admin APIs for managing events
 router.post('/admin/events', verifyAdminToken, async (req, res) => {
-  const { title, gameTitle, prizePool, maxPlayers, rules, driveLink, status, registrationFields, closesAt } = req.body;
+  const { title, gameTitle, prizePool, maxPlayers, rules, driveLink, status, registrationFields, closesAt, entryFee, isPaid } = req.body;
   
   if (!title || !gameTitle || !prizePool || !maxPlayers || !driveLink) {
     return res.status(400).json({ success: false, message: 'Required tournament fields are missing.' });
@@ -673,6 +719,8 @@ router.post('/admin/events', verifyAdminToken, async (req, res) => {
 
   try {
     const closesAtDate = closesAt ? new Date(closesAt) : undefined;
+    const cleanIsPaid = isPaid === true || isPaid === 'true';
+    const cleanEntryFee = Number(entryFee || 0);
     
     if (isConnected()) {
       const event = new Event({
@@ -684,7 +732,9 @@ router.post('/admin/events', verifyAdminToken, async (req, res) => {
         driveLink,
         status: status || 'Open',
         registrationFields: Array.isArray(registrationFields) ? registrationFields : [],
-        closesAt: closesAtDate
+        closesAt: closesAtDate,
+        entryFee: cleanEntryFee,
+        isPaid: cleanIsPaid
       });
       await event.save();
       res.status(201).json({ success: true, message: 'Tournament event created successfully!' });
@@ -700,6 +750,8 @@ router.post('/admin/events', verifyAdminToken, async (req, res) => {
         status: status || 'Open',
         registrationFields: Array.isArray(registrationFields) ? registrationFields : [],
         closesAt: closesAtDate,
+        entryFee: cleanEntryFee,
+        isPaid: cleanIsPaid,
         createdAt: new Date()
       };
       mockDb.events.push(newEvent);
@@ -727,6 +779,37 @@ router.put('/admin/events/:id/close', verifyAdminToken, async (req, res) => {
       }
       event.status = 'Closed';
       return res.json({ success: true, message: 'Tournament registration closed successfully! (In-memory DB fallback)' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete Event completely (cascading delete applications)
+router.delete('/admin/events/:id', verifyAdminToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    if (isConnected()) {
+      // 1. Delete Event
+      const deletedEvent = await Event.findByIdAndDelete(id);
+      if (!deletedEvent) {
+        return res.status(404).json({ success: false, message: 'Tournament event not found.' });
+      }
+      // 2. Cascading delete applications linked to this event
+      await EventApplication.deleteMany({ eventId: id });
+      
+      return res.json({ success: true, message: 'Tournament and all associated registrations deleted successfully!' });
+    } else {
+      const idx = mockDb.events.findIndex(e => e._id === id);
+      if (idx === -1) {
+        return res.status(404).json({ success: false, message: 'Tournament event not found.' });
+      }
+      mockDb.events.splice(idx, 1);
+      
+      // Cascading delete mock applications
+      mockDb.applications = mockDb.applications.filter(a => a.eventId !== id);
+      
+      return res.json({ success: true, message: 'Tournament deleted successfully! (In-memory DB fallback)' });
     }
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -825,6 +908,237 @@ router.post('/admin/reset-database', verifyAdminToken, async (req, res) => {
   } catch (error) {
     console.error('Reset database error:', error);
     res.status(500).json({ success: false, message: 'Failed to reset database.', error: error.message });
+  }
+});
+
+// 9. Payment Config and Razorpay Order Endpoints
+router.get('/admin/payment-config', verifyAdminToken, async (req, res) => {
+  try {
+    let config = null;
+    if (isConnected()) {
+      config = await PaymentConfig.findOne({});
+      if (!config) {
+        config = new PaymentConfig({ razorpayKeyId: '', razorpayKeySecret: '', isPaymentEnabled: true });
+        await config.save();
+      }
+    } else {
+      config = mockDb.paymentConfig;
+    }
+    
+    res.json({
+      success: true,
+      config: {
+        razorpayKeyId: config.razorpayKeyId || '',
+        razorpayKeySecretMasked: config.razorpayKeySecret ? '••••••••' + config.razorpayKeySecret.slice(-4) : '',
+        isPaymentEnabled: config.isPaymentEnabled
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/admin/payment-config', verifyAdminToken, async (req, res) => {
+  const { razorpayKeyId, razorpayKeySecret, isPaymentEnabled } = req.body;
+  try {
+    const isEnabled = isPaymentEnabled === true || isPaymentEnabled === 'true';
+    if (isConnected()) {
+      let config = await PaymentConfig.findOne({});
+      if (!config) {
+        config = new PaymentConfig();
+      }
+      config.razorpayKeyId = razorpayKeyId || '';
+      if (razorpayKeySecret && !razorpayKeySecret.includes('••••')) {
+        config.razorpayKeySecret = razorpayKeySecret;
+      }
+      config.isPaymentEnabled = isEnabled;
+      await config.save();
+    } else {
+      mockDb.paymentConfig.razorpayKeyId = razorpayKeyId || '';
+      if (razorpayKeySecret && !razorpayKeySecret.includes('••••')) {
+        mockDb.paymentConfig.razorpayKeySecret = razorpayKeySecret;
+      }
+      mockDb.paymentConfig.isPaymentEnabled = isEnabled;
+    }
+    res.json({ success: true, message: 'Payment configuration saved successfully!' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/payments/create-order', verifyPlayerToken, async (req, res) => {
+  const { eventId } = req.body;
+  if (!eventId) {
+    return res.status(400).json({ success: false, message: 'Tournament Event ID is required.' });
+  }
+  try {
+    let event = null;
+    if (isConnected()) {
+      event = await Event.findById(eventId);
+    } else {
+      event = mockDb.events.find(e => e._id === eventId);
+    }
+
+    if (!event) {
+      return res.status(404).json({ success: false, message: 'Tournament event not found.' });
+    }
+
+    if (!event.isPaid || event.entryFee <= 0) {
+      return res.status(400).json({ success: false, message: 'This event is free of charge. No payment required.' });
+    }
+
+    let keyId = process.env.RAZORPAY_KEY_ID;
+    let keySecret = process.env.RAZORPAY_KEY_SECRET;
+    
+    if (isConnected()) {
+      const config = await PaymentConfig.findOne({});
+      if (config) {
+        if (config.razorpayKeyId) keyId = config.razorpayKeyId;
+        if (config.razorpayKeySecret) keySecret = config.razorpayKeySecret;
+      }
+    } else {
+      if (mockDb.paymentConfig.razorpayKeyId) keyId = mockDb.paymentConfig.razorpayKeyId;
+      if (mockDb.paymentConfig.razorpayKeySecret) keySecret = mockDb.paymentConfig.razorpayKeySecret;
+    }
+
+    if (!keyId || !keySecret) {
+      return res.status(400).json({ success: false, message: 'Online payments are currently unavailable. Razorpay is not configured.' });
+    }
+
+    const amount = Math.round(event.entryFee * 100); // paise
+    const receipt = `rcpt_${eventId.substring(0, 8)}_${Date.now().toString().slice(-6)}`;
+    
+    const rzpResponse = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + Buffer.from(keyId + ':' + keySecret).toString('base64'),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        amount: amount,
+        currency: 'INR',
+        receipt: receipt
+      })
+    });
+
+    const rzpData = await rzpResponse.json();
+
+    if (!rzpResponse.ok) {
+      console.error('Razorpay Order API failure:', rzpData);
+      return res.status(500).json({ success: false, message: 'Failed to initiate Razorpay order.', error: rzpData.error?.description || 'Unknown error' });
+    }
+
+    res.json({
+      success: true,
+      order: rzpData,
+      keyId: keyId
+    });
+  } catch (error) {
+    console.error('Create order error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 10. Advertisement APIs
+router.get('/advertisements/active', async (req, res) => {
+  try {
+    if (isConnected()) {
+      const ads = await Advertisement.find({ status: 'Active' }).sort({ createdAt: -1 });
+      res.json({ success: true, advertisements: ads });
+    } else {
+      const activeAds = mockDb.advertisements.filter(a => a.status === 'Active');
+      res.json({ success: true, advertisements: activeAds });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.get('/admin/advertisements', verifyAdminToken, async (req, res) => {
+  try {
+    if (isConnected()) {
+      const ads = await Advertisement.find({}).sort({ createdAt: -1 });
+      res.json({ success: true, advertisements: ads });
+    } else {
+      res.json({ success: true, advertisements: mockDb.advertisements });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/admin/advertisements', verifyAdminToken, async (req, res) => {
+  const { title, subtitle, imageUrl, buttonText, buttonUrl, prizePool, eventDate, entryFee, closesAt } = req.body;
+  if (!title) {
+    return res.status(400).json({ success: false, message: 'Advertisement title is required.' });
+  }
+  try {
+    const closesAtDate = closesAt ? new Date(closesAt) : undefined;
+    
+    if (isConnected()) {
+      const ad = new Advertisement({
+        title, subtitle, imageUrl, buttonText, buttonUrl, prizePool, eventDate, entryFee, closesAt: closesAtDate
+      });
+      await ad.save();
+      res.status(201).json({ success: true, message: 'Advertisement created successfully!', advertisement: ad });
+    } else {
+      const ad = {
+        _id: 'mock-ad-' + Date.now(),
+        title, subtitle, imageUrl, buttonText, buttonUrl, prizePool, eventDate, entryFee, closesAt: closesAtDate,
+        status: 'Active',
+        createdAt: new Date()
+      };
+      mockDb.advertisements.push(ad);
+      res.status(201).json({ success: true, message: 'Advertisement created successfully! (In-memory DB fallback)', advertisement: ad });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.delete('/admin/advertisements/:id', verifyAdminToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    if (isConnected()) {
+      const deleted = await Advertisement.findByIdAndDelete(id);
+      if (!deleted) {
+        return res.status(404).json({ success: false, message: 'Advertisement not found.' });
+      }
+      res.json({ success: true, message: 'Advertisement deleted successfully!' });
+    } else {
+      const idx = mockDb.advertisements.findIndex(a => a._id === id);
+      if (idx === -1) {
+        return res.status(404).json({ success: false, message: 'Advertisement not found.' });
+      }
+      mockDb.advertisements.splice(idx, 1);
+      res.json({ success: true, message: 'Advertisement deleted successfully! (In-memory DB fallback)' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.put('/admin/advertisements/:id/toggle', verifyAdminToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    if (isConnected()) {
+      const ad = await Advertisement.findById(id);
+      if (!ad) {
+        return res.status(404).json({ success: false, message: 'Advertisement not found.' });
+      }
+      ad.status = ad.status === 'Active' ? 'Inactive' : 'Active';
+      await ad.save();
+      res.json({ success: true, message: `Advertisement status changed to ${ad.status}!`, advertisement: ad });
+    } else {
+      const ad = mockDb.advertisements.find(a => a._id === id);
+      if (!ad) {
+        return res.status(404).json({ success: false, message: 'Advertisement not found.' });
+      }
+      ad.status = ad.status === 'Active' ? 'Inactive' : 'Active';
+      res.json({ success: true, message: `Advertisement status changed to ${ad.status}! (In-memory DB fallback)`, advertisement: ad });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

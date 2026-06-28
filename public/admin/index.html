@@ -98,6 +98,7 @@
           <li><a href="/admin">Dashboard Home</a></li>
           <li><a href="/admin/create-event">Create Tournament</a></li>
           <li><a href="/admin/events">Current Tournaments</a></li>
+          <li><a href="/admin/advertisements">Manage Ads</a></li>
           <li><a href="/admin/users">View User Accounts</a></li>
           <li><a href="/admin/applications">View Player Applications</a></li>
           <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
@@ -121,6 +122,33 @@
             <li><strong>Total Created Tournaments:</strong> <span id="status-events">Checking...</span></li>
           </ul>
           <p><button id="refresh-status-btn" type="button">Refresh Diagnostics</button></p>
+        </fieldset>
+
+        <!-- Razorpay Configuration Panel -->
+        <fieldset style="margin-bottom: 1.5rem; border-color: #4f46e5;">
+          <legend style="color: #4f46e5; font-weight: bold;">Razorpay Payment Gateway Settings</legend>
+          <p style="font-size: 0.9rem; color: #4b5563; margin-top: 0;">Configure the API credentials used for online player event registration entry fees.</p>
+          <form id="payment-config-form">
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label for="razorpay-key-id" style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Razorpay Key ID:</label>
+              <input type="text" id="razorpay-key-id" placeholder="rzp_test_..." style="width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc;">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label for="razorpay-key-secret" style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Razorpay Secret Key:</label>
+              <input type="password" id="razorpay-key-secret" placeholder="Secret Key (hidden)" style="width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+              <input type="checkbox" id="razorpay-enabled" style="width: auto;" checked>
+              <label for="razorpay-enabled" style="font-weight: 600; user-select: none; cursor: pointer;">Enable Online Payments</label>
+            </div>
+
+            <button type="submit" style="background-color: #4f46e5; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+              Save Gateway Configuration
+            </button>
+          </form>
+          <p id="payment-config-msg" style="font-weight: bold; margin-top: 0.5rem; font-size: 0.9rem;"></p>
         </fieldset>
 
         <!-- System Maintenance Panel -->
@@ -244,6 +272,7 @@
       authContainer.setAttribute('hidden', '');
       dashboardWrapper.removeAttribute('hidden');
       loadStatus();
+      loadPaymentConfig();
     }
 
     // Handle Admin Authentication POST
@@ -393,6 +422,73 @@
     refreshStatusBtn.addEventListener('click', () => {
       loadStatus();
     });
+
+    // Handle Payment Config Submission
+    const paymentConfigForm = document.getElementById('payment-config-form');
+    const paymentConfigMsg = document.getElementById('payment-config-msg');
+    
+    paymentConfigForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      paymentConfigMsg.textContent = 'Saving configuration...';
+      paymentConfigMsg.style.color = '#7c3aed';
+      
+      const token = localStorage.getItem('adminToken');
+      const razorpayKeyId = document.getElementById('razorpay-key-id').value;
+      const razorpayKeySecret = document.getElementById('razorpay-key-secret').value;
+      const isPaymentEnabled = document.getElementById('razorpay-enabled').checked;
+      
+      try {
+        const response = await fetch('/api/admin/payment-config', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ razorpayKeyId, razorpayKeySecret, isPaymentEnabled })
+        });
+        
+        const data = await response.json();
+        if (response.ok && data.success) {
+          paymentConfigMsg.textContent = 'SUCCESS: ' + data.message;
+          paymentConfigMsg.style.color = '#16a34a';
+          loadPaymentConfig();
+          setTimeout(() => { paymentConfigMsg.textContent = ''; }, 3000);
+        } else {
+          paymentConfigMsg.textContent = 'Error: ' + (data.message || 'Failed to save configuration');
+          paymentConfigMsg.style.color = '#dc2626';
+        }
+      } catch (error) {
+        console.error('Payment Config Save Error:', error);
+        paymentConfigMsg.textContent = 'Error: Failed to connect to server.';
+        paymentConfigMsg.style.color = '#dc2626';
+      }
+    });
+
+    async function loadPaymentConfig() {
+      const token = localStorage.getItem('adminToken');
+      if (!token) return;
+      
+      try {
+        const response = await fetch('/api/admin/payment-config', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        if (response.ok && data.success) {
+          document.getElementById('razorpay-key-id').value = data.config.razorpayKeyId || '';
+          if (data.config.razorpayKeySecretMasked) {
+            document.getElementById('razorpay-key-secret').placeholder = data.config.razorpayKeySecretMasked;
+            document.getElementById('razorpay-key-secret').value = data.config.razorpayKeySecretMasked;
+          } else {
+            document.getElementById('razorpay-key-secret').placeholder = 'Secret Key (hidden)';
+            document.getElementById('razorpay-key-secret').value = '';
+          }
+          document.getElementById('razorpay-enabled').checked = data.config.isPaymentEnabled;
+        }
+      } catch (error) {
+        console.error('Failed to load payment config:', error);
+      }
+    }
 
     // Fetch and populate status statistics
     async function loadStatus() {

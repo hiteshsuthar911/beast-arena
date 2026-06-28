@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Advertisements - Admin Panel</title>
+  <link rel="stylesheet" href="/admin.css">
+  <script src="/nav.js" defer></script>
+</head>
+<body>
+
+  <header>
+    <h1>Beast Arena Gaming Network - Control Panel</h1>
+    <p><strong>Custom Advertisements & Promotion Panel</strong></p>
+    
+    <nav>
+      <ul>
+        <li><a href="/admin">Dashboard Home</a></li>
+        <li><a href="/admin/create-event">Create Tournament</a></li>
+        <li><a href="/admin/events">Current Tournaments</a></li>
+        <li><a href="/admin/advertisements">Manage Ads</a></li>
+        <li><a href="/admin/users">View User Accounts</a></li>
+        <li><a href="/admin/applications">View Player Applications</a></li>
+        <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <hr>
+
+    <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+      <!-- Create Ad Section -->
+      <section style="flex: 1; min-width: 320px;">
+        <h2>Create Custom Advertisement</h2>
+        <p>Publish an advertisement banner card to the landing page with custom details and countdown timers.</p>
+        
+        <form id="create-ad-form">
+          <fieldset>
+            <legend>Ad Setup Details</legend>
+            
+            <p>
+              <label for="ad-title">Ad Title:</label><br>
+              <input type="text" id="ad-title" required placeholder="PUBG Mobile Ultimate Showdown">
+            </p>
+
+            <p>
+              <label for="ad-subtitle">Subtitle / Description:</label><br>
+              <textarea id="ad-subtitle" rows="3" style="width:100%;" placeholder="Join India's elite squad tournament, prove your skills..."></textarea>
+            </p>
+
+            <p>
+              <label for="ad-image-select">Background Banner Image:</label><br>
+              <select id="ad-image-select">
+                <option value="/pubg_banner.png">PUBG Banner (Golden Helmet Visual)</option>
+                <option value="/bgmi.png">BGMI Art</option>
+                <option value="/valorant.png">Valorant Art</option>
+                <option value="/minecraft.png">Minecraft Art</option>
+                <option value="/apex_legend.png">Apex Legends Art</option>
+                <option value="/gta_5.png">GTA 5 Art</option>
+                <option value="/fifa_26.png">FIFA 26 Art</option>
+                <option value="custom">-- Custom Image URL --</option>
+              </select>
+            </p>
+
+            <p id="custom-image-container" style="display: none;">
+              <label for="ad-image-custom">Custom Image URL:</label><br>
+              <input type="url" id="ad-image-custom" placeholder="https://example.com/banner.jpg">
+            </p>
+
+            <p>
+              <label for="ad-link-select">Link Button to Active Event (Optional):</label><br>
+              <select id="ad-link-select">
+                <option value="">-- Custom Link URL --</option>
+              </select>
+              <small>If selected, the button URL is automatically linked to pre-select that tournament on registration.</small>
+            </p>
+
+            <p id="custom-url-container">
+              <label for="ad-button-url">Button Redirect URL:</label><br>
+              <input type="text" id="ad-button-url" placeholder="/register" value="/register">
+            </p>
+
+            <p>
+              <label for="ad-button-text">Button Text Label:</label><br>
+              <input type="text" id="ad-button-text" placeholder="Register & Pay Entry Fee 🏆" value="Register & Pay Entry Fee 🏆">
+            </p>
+
+            <p>
+              <label for="ad-prize">Prize Pool Display (e.g. ₹1,00,000 INR):</label><br>
+              <input type="text" id="ad-prize" placeholder="₹1,00,000 INR">
+            </p>
+
+            <p>
+              <label for="ad-date">Event Date Display (e.g. August 11, 2026):</label><br>
+              <input type="text" id="ad-date" placeholder="August 11, 2026">
+            </p>
+
+            <p>
+              <label for="ad-fee">Entry Fee Display (e.g. ₹150):</label><br>
+              <input type="text" id="ad-fee" placeholder="₹150 (Paid)">
+            </p>
+
+            <p>
+              <label for="ad-closes-at">Ad Countdown Closing Date & Time (Optional):</label><br>
+              <input type="datetime-local" id="ad-closes-at">
+              <br><small>Ticking countdown timer displays on homepage card until this target datetime.</small>
+            </p>
+
+            <p>
+              <button type="submit" style="background:#4f46e5; color:white; padding:10px 20px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Publish Advertisement</button>
+            </p>
+          </fieldset>
+        </form>
+        <p id="ad-form-message" style="font-weight:bold;"></p>
+      </section>
+
+      <!-- Manage Ads Section -->
+      <section style="flex: 1.2; min-width: 320px;">
+        <h2>Active Advertisements</h2>
+        <p>Audit and toggle published advertisements showing on the homepage.</p>
+        
+        <div id="ads-list-container" style="display:flex; flex-direction:column; gap:1rem;">
+          <p>Loading advertisements database...</p>
+        </div>
+      </section>
+    </div>
+
+    <hr>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
+  </footer>
+
+  <script>
+    const logoutBtn = document.getElementById('admin-logout-btn');
+    const createAdForm = document.getElementById('create-ad-form');
+    const adFormMessage = document.getElementById('ad-form-message');
+    const adImageSelect = document.getElementById('ad-image-select');
+    const customImageContainer = document.getElementById('custom-image-container');
+    const adLinkSelect = document.getElementById('ad-link-select');
+    const customUrlContainer = document.getElementById('custom-url-container');
+    const adButtonUrl = document.getElementById('ad-button-url');
+    let eventsList = [];
+
+    // Check auth token
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        window.location.href = '/admin';
+        return;
+      }
+
+      // Toggle custom image inputs
+      adImageSelect.addEventListener('change', () => {
+        if (adImageSelect.value === 'custom') {
+          customImageContainer.style.display = 'block';
+          document.getElementById('ad-image-custom').required = true;
+        } else {
+          customImageContainer.style.display = 'none';
+          document.getElementById('ad-image-custom').required = false;
+        }
+      });
+
+      // Toggle custom links / event links
+      adLinkSelect.addEventListener('change', () => {
+        if (adLinkSelect.value) {
+          customUrlContainer.style.display = 'none';
+          adButtonUrl.value = `/register?eventId=${adLinkSelect.value}`;
+        } else {
+          customUrlContainer.style.display = 'block';
+          adButtonUrl.value = '/register';
+        }
+      });
+
+      await loadActiveEvents(token);
+      await loadAdvertisements(token);
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('adminToken');
+      window.location.href = '/admin';
+    });
+
+    // Load active tournaments to fill linking select dropdown
+    async function loadActiveEvents(token) {
+      try {
+        const res = await fetch('/api/admin/events', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success && data.events) {
+          eventsList = data.events;
+          data.events.forEach(evt => {
+            const opt = document.createElement('option');
+            opt.value = evt._id;
+            opt.textContent = `${evt.title} (${evt.gameTitle})`;
+            adLinkSelect.appendChild(opt);
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load events list:', err);
+      }
+    }
+
+    // Load created ads list
+    async function loadAdvertisements(token) {
+      const adsContainer = document.getElementById('ads-list-container');
+      try {
+        const res = await fetch('/api/admin/advertisements', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success && data.advertisements && data.advertisements.length > 0) {
+          adsContainer.innerHTML = '';
+          data.advertisements.forEach(ad => {
+            const card = document.createElement('div');
+            card.style.background = '#ffffff';
+            card.style.border = '1px solid #e2e8f0';
+            card.style.borderRadius = '8px';
+            card.style.padding = '1.25rem';
+            card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+            card.style.display = 'flex';
+            card.style.gap = '1.25rem';
+            card.style.alignItems = 'center';
+
+            const previewImg = document.createElement('img');
+            previewImg.src = ad.imageUrl || '/beastarena.png';
+            previewImg.style.width = '80px';
+            previewImg.style.height = '80px';
+            previewImg.style.borderRadius = '6px';
+            previewImg.style.objectFit = 'cover';
+            previewImg.style.border = '1px solid #cbd5e1';
+            card.appendChild(previewImg);
+
+            const detailsDiv = document.createElement('div');
+            detailsDiv.style.flex = '1';
+
+            const titleH3 = document.createElement('h3');
+            titleH3.textContent = ad.title;
+            titleH3.style.margin = '0 0 0.25rem 0';
+            titleH3.style.fontSize = '1.05rem';
+            detailsDiv.appendChild(titleH3);
+
+            const subtitleP = document.createElement('p');
+            subtitleP.textContent = ad.subtitle || 'No description.';
+            subtitleP.style.margin = '0 0 0.5rem 0';
+            subtitleP.style.fontSize = '0.85rem';
+            subtitleP.style.color = '#64748b';
+            detailsDiv.appendChild(subtitleP);
+
+            const detailsMeta = document.createElement('div');
+            detailsMeta.style.fontSize = '0.78rem';
+            detailsMeta.style.color = '#475569';
+            detailsMeta.innerHTML = `
+              <strong>Date:</strong> ${ad.eventDate || 'N/A'} | 
+              <strong>Fee:</strong> ${ad.entryFee || 'N/A'} | 
+              <strong>Prize:</strong> ${ad.prizePool || 'N/A'}
+            `;
+            detailsDiv.appendChild(detailsMeta);
+            card.appendChild(detailsDiv);
+
+            const actionDiv = document.createElement('div');
+            actionDiv.style.display = 'flex';
+            actionDiv.style.flexDirection = 'column';
+            actionDiv.style.gap = '0.5rem';
+            actionDiv.style.alignItems = 'flex-end';
+
+            const statusBadge = document.createElement('span');
+            statusBadge.textContent = ad.status;
+            statusBadge.style.fontSize = '0.7rem';
+            statusBadge.style.fontWeight = 'bold';
+            statusBadge.style.padding = '2px 8px';
+            statusBadge.style.borderRadius = '4px';
+            if (ad.status === 'Active') {
+              statusBadge.style.background = '#d1fae5';
+              statusBadge.style.color = '#065f46';
+            } else {
+              statusBadge.style.background = '#f1f5f9';
+              statusBadge.style.color = '#475569';
+            }
+            actionDiv.appendChild(statusBadge);
+
+            const toggleBtn = document.createElement('button');
+            toggleBtn.textContent = ad.status === 'Active' ? 'Deactivate 🛑' : 'Activate 🟢';
+            toggleBtn.style.padding = '4px 8px';
+            toggleBtn.style.fontSize = '0.8rem';
+            toggleBtn.style.cursor = 'pointer';
+            toggleBtn.addEventListener('click', async () => {
+              try {
+                const toggleRes = await fetch(`/api/admin/advertisements/${ad._id}/toggle`, {
+                  method: 'PUT',
+                  headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const toggleData = await toggleRes.json();
+                if (toggleRes.ok && toggleData.success) {
+                  loadAdvertisements(token);
+                }
+              } catch (err) {
+                console.error(err);
+              }
+            });
+            actionDiv.appendChild(toggleBtn);
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete 🗑️';
+            deleteBtn.style.padding = '4px 8px';
+            deleteBtn.style.fontSize = '0.8rem';
+            deleteBtn.style.background = '#ef4444';
+            deleteBtn.style.color = 'white';
+            deleteBtn.style.border = 'none';
+            deleteBtn.style.borderRadius = '4px';
+            deleteBtn.style.cursor = 'pointer';
+            deleteBtn.addEventListener('click', async () => {
+              if (confirm(`Are you sure you want to delete the advertisement "${ad.title}"?`)) {
+                try {
+                  const delRes = await fetch(`/api/admin/advertisements/${ad._id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  });
+                  const delData = await delRes.json();
+                  if (delRes.ok && delData.success) {
+                    loadAdvertisements(token);
+                  }
+                } catch (err) {
+                  console.error(err);
+                }
+              }
+            });
+            actionDiv.appendChild(deleteBtn);
+
+            card.appendChild(actionDiv);
+            adsContainer.appendChild(card);
+          });
+        } else {
+          adsContainer.innerHTML = '<p>No advertisements created yet. Use the form to publish one.</p>';
+        }
+      } catch (err) {
+        console.error('Failed to load advertisements:', err);
+        adsContainer.innerHTML = '<p>Error loading advertisements database.</p>';
+      }
+    }
+
+    // Handle form submit
+    createAdForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      adFormMessage.textContent = 'Publishing custom advertisement...';
+      adFormMessage.style.color = '#7c3aed';
+      const token = localStorage.getItem('adminToken');
+
+      const title = document.getElementById('ad-title').value;
+      const subtitle = document.getElementById('ad-subtitle').value;
+      
+      let imageUrl = adImageSelect.value;
+      if (imageUrl === 'custom') {
+        imageUrl = document.getElementById('ad-image-custom').value;
+      }
+      
+      const buttonUrl = adButtonUrl.value;
+      const buttonText = document.getElementById('ad-button-text').value;
+      const prizePool = document.getElementById('ad-prize').value;
+      const eventDate = document.getElementById('ad-date').value;
+      const entryFee = document.getElementById('ad-fee').value;
+      const closesAt = document.getElementById('ad-closes-at').value || null;
+
+      try {
+        const response = await fetch('/api/admin/advertisements', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            title, subtitle, imageUrl, buttonText, buttonUrl, prizePool, eventDate, entryFee, closesAt
+          })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success) {
+          adFormMessage.textContent = 'SUCCESS: Advertisement published!';
+          adFormMessage.style.color = '#16a34a';
+          createAdForm.reset();
+          customImageContainer.style.display = 'none';
+          customUrlContainer.style.display = 'block';
+          adButtonUrl.value = '/register';
+          
+          await loadAdvertisements(token);
+          setTimeout(() => { adFormMessage.textContent = ''; }, 3000);
+        } else {
+          adFormMessage.textContent = 'Error: ' + (data.message || 'Failed to create ad.');
+          adFormMessage.style.color = '#ef4444';
+        }
+      } catch (err) {
+        console.error('Create ad error:', err);
+        adFormMessage.textContent = 'Error: Failed to connect to server.';
+        adFormMessage.style.color = '#ef4444';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -10,6 +10,8 @@ const EventSchema = new mongoose.Schema({
   status: { type: String, enum: ['Open', 'Closed'], default: 'Open' },
   registrationFields: { type: [String], default: [] },
   closesAt: { type: Date },
+  entryFee: { type: Number, default: 0 },
+  isPaid: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 

@@ -6,6 +6,7 @@
   <title>Tournament Registration - Beast Arena Gaming Network</title>
   <link rel="stylesheet" href="/index.css?v=1.5">
   <script src="/nav.js" defer></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 
@@ -50,6 +51,11 @@
               <option value="" disabled selected>-- Loading active tournaments... --</option>
             </select>
           </p>
+
+          <!-- ENTRY FEE NOTICE -->
+          <div id="entry-fee-notice" style="display: none; padding: 12px; margin: 10px 0; background: #e0e7ff; border-left: 4px solid #4f46e5; border-radius: 4px; font-weight: bold; color: #1e1b4b;">
+            💵 This is a premium tournament. Entry Fee: <span id="entry-fee-amount">₹0</span> (requires online payment via Razorpay).
+          </div>
 
           <!-- FIELDSET 1: PERSONAL & CONTACT DETAILS -->
           <fieldset id="group-personal" hidden>
@@ -333,6 +339,16 @@
         return;
       }
 
+      // Show/hide entry fee notice
+      const entryFeeNotice = document.getElementById('entry-fee-notice');
+      const entryFeeAmount = document.getElementById('entry-fee-amount');
+      if (selectedEvent.isPaid && selectedEvent.entryFee > 0) {
+        entryFeeAmount.textContent = `₹${selectedEvent.entryFee.toLocaleString()}`;
+        entryFeeNotice.style.display = 'block';
+      } else {
+        entryFeeNotice.style.display = 'none';
+      }
+
       // 1. Get enabled fields config array
       const enabledFields = selectedEvent.registrationFields || [];
 
@@ -411,7 +427,7 @@
 
     regForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      regMessage.textContent = 'Submitting application...';
+      regMessage.textContent = 'Validating form fields...';
 
       const token = localStorage.getItem('playerToken');
       if (!token) {
@@ -420,7 +436,6 @@
         return;
       }
 
-      // Check if event is selected
       const eventId = eventSelect.value;
       const selectedEvent = eventsList.find(e => e._id === eventId);
       if (!selectedEvent) {
@@ -430,7 +445,6 @@
 
       const enabledFields = selectedEvent.registrationFields || [];
 
-      // Validate microphone prompt ONLY if enabled
       if (enabledFields.includes('hasWorkingMic')) {
         const micSelected = document.querySelector('input[name="hasWorkingMic"]:checked').value;
         if (micSelected === 'false') {
@@ -440,7 +454,6 @@
         }
       }
 
-      // Read values dynamically based on enabled states
       const fullName = enabledFields.includes('fullName') ? nameInput.value : undefined;
       const age = enabledFields.includes('age') ? document.getElementById('reg-age').value : undefined;
       const email = enabledFields.includes('email') ? document.getElementById('reg-email').value : undefined;
@@ -466,59 +479,128 @@
         });
       }
 
-      try {
-        const response = await fetch('/api/events/register', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            eventId,
-            fullName,
-            age: age ? Number(age) : null,
-            email,
-            discordUsername,
-            phone,
-            hasWorkingMic,
-            game,
-            ign,
-            uid,
-            rank,
-            device,
-            whySelect,
-            creatorLink,
-            teamStatus,
-            teamName,
-            secondaryGames,
-            referral,
-            agreedToTerms
-          })
-        });
+      // Check if payment is required
+      if (selectedEvent.isPaid && selectedEvent.entryFee > 0) {
+        regMessage.textContent = 'Initiating payment gateway...';
+        try {
+          const response = await fetch('/api/payments/create-order', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ eventId })
+          });
 
-        const data = await response.json();
-
-        if (response.ok) {
-          regMessage.textContent = `Success: ${data.message}`;
-          regForm.reset();
-          hideAllFieldsets();
-          
-          // Refill email from token
-          try {
-            const decoded = atob(token);
-            const emailVal = decoded.split(':')[0];
-            if (emailVal) document.getElementById('reg-email').value = emailVal;
-          } catch (ex) {}
-        } else {
-          regMessage.textContent = `Error: ${data.message}`;
-          if (response.status === 401) {
-            localStorage.removeItem('playerToken');
-            setTimeout(() => { window.location.href = '/login'; }, 1500);
+          const data = await response.json();
+          if (!response.ok || !data.success) {
+            regMessage.textContent = `Error: ${data.message || 'Failed to initiate payment gateway.'}`;
+            return;
           }
+
+          // Open Razorpay Checkout modal
+          const rzpOptions = {
+            "key": data.keyId,
+            "amount": data.order.amount,
+            "currency": "INR",
+            "name": "Beast Arena",
+            "description": `Entry Fee: ${selectedEvent.title}`,
+            "image": "/beastarena.png",
+            "order_id": data.order.id,
+            "handler": async function (rzpResponse) {
+              regMessage.textContent = 'Payment verified! Completing registration details...';
+              await submitRegistrationData(rzpResponse);
+            },
+            "prefill": {
+              "name": fullName || '',
+              "email": email || '',
+              "contact": phone || ''
+            },
+            "theme": {
+              "color": "#4f46e5"
+            },
+            "modal": {
+              "ondismiss": function () {
+                regMessage.textContent = 'Process cancelled. Complete the payment to register.';
+              }
+            }
+          };
+          const rzp = new Razorpay(rzpOptions);
+          rzp.open();
+        } catch (error) {
+          console.error('Razorpay startup error:', error);
+          regMessage.textContent = 'Error: Failed to connect to payment server.';
         }
-      } catch (error) {
-        console.error('Error submitting registration:', error);
-        regMessage.textContent = 'Error: Failed to connect to backend server.';
+      } else {
+        // Free event registration
+        regMessage.textContent = 'Submitting application...';
+        await submitRegistrationData(null);
+      }
+
+      async function submitRegistrationData(paymentDetails) {
+        const payload = {
+          eventId,
+          fullName,
+          age: age ? Number(age) : null,
+          email,
+          discordUsername,
+          phone,
+          hasWorkingMic,
+          game,
+          ign,
+          uid,
+          rank,
+          device,
+          whySelect,
+          creatorLink,
+          teamStatus,
+          teamName,
+          secondaryGames,
+          referral,
+          agreedToTerms
+        };
+
+        if (paymentDetails) {
+          payload.razorpayOrderId = paymentDetails.razorpay_order_id;
+          payload.razorpayPaymentId = paymentDetails.razorpay_payment_id;
+          payload.razorpaySignature = paymentDetails.razorpay_signature;
+        }
+
+        try {
+          const response = await fetch('/api/events/register', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            regMessage.textContent = `Success: ${data.message}`;
+            regForm.reset();
+            hideAllFieldsets();
+            document.getElementById('entry-fee-notice').style.display = 'none';
+            
+            // Refill email from token
+            try {
+              const decoded = atob(token);
+              const emailVal = decoded.split(':')[0];
+              if (emailVal) document.getElementById('reg-email').value = emailVal;
+            } catch (ex) {}
+          } else {
+            regMessage.textContent = `Error: ${data.message}`;
+            if (response.status === 401) {
+              localStorage.removeItem('playerToken');
+              setTimeout(() => { window.location.href = '/login'; }, 1500);
+            }
+          }
+        } catch (error) {
+          console.error('Error submitting registration:', error);
+          regMessage.textContent = 'Error: Failed to connect to backend server.';
+        }
       }
     });
   </script>
