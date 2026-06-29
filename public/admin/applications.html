@@ -7,91 +7,101 @@
   <link rel="stylesheet" href="/admin.css">
   <script src="/nav.js" defer></script>
 </head>
-<body>
-
-  <header>
-    <h1>Beast Arena Gaming Network - Control Panel</h1>
-    <p><strong>Tournament Player Applications Tracker</strong></p>
-    
-    <nav>
+<div class="admin-container">
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="/beastarena.png" alt="Beast Arena" class="logo-svg">
+      <div class="logo-text">
+        <h1>Beast Arena</h1>
+        <p>Control Panel</p>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
       <ul>
-        <li><a href="/admin">Dashboard Home</a></li>
-        <li><a href="/admin/create-event">Create Tournament</a></li>
+        <li><a href="/admin">🏠 Dashboard Home</a></li>
+        <li><a href="/admin/create-event">➕ Create Tournament</a></li>
         <li><a href="/admin/events">Current Tournaments</a></li>
         <li><a href="/admin/advertisements">Manage Ads</a></li>
         <li><a href="/admin/users">View User Accounts</a></li>
-        <li><a href="/admin/applications">View Player Applications</a></li>
-        <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
+        <li><a href="/admin/applications" class="active">📋 View Player Applications</a></li>
       </ul>
     </nav>
-  </header>
+    <div class="sidebar-footer">
+      <button id="admin-logout-btn" class="logout-btn">🚪 Sign Out</button>
+    </div>
+  </aside>
 
-  <main>
-    <hr>
-
-    <section id="applications-list-section">
-      <h2>Active Tournament Submissions</h2>
-      <p>Confirm user identities, player profiles, and inspect their Google Drive video uploads.</p>
-      
-      <!-- Tournament Filter Dropdown -->
-      <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-        <div>
-          <label for="event-filter" style="font-weight: bold; margin-right: 0.5rem;">Filter by Tournament:</label>
-          <select id="event-filter" style="padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg2); color: var(--fg); font-weight: bold; outline: none; min-width: 250px;">
-            <option value="all">All Tournaments</option>
-          </select>
-        </div>
-        <div style="font-size: 0.9rem; color: var(--fg-muted);">
-          Showing <span id="filtered-count" style="font-weight: bold; color: var(--accent);">0</span> applications.
-        </div>
+  <!-- Right Content Area -->
+  <main class="content-area">
+    <header class="content-header">
+      <h2>Tournament Player Applications Tracker</h2>
+      <div class="header-status">
+        <span class="status-indicator"></span> Live Session
       </div>
-      
-      <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 0.5rem 0; text-align: right; font-style: italic;">↔️ Scroll table horizontally to view remaining columns (Payment Status, Invoice, Actions, etc.)</p>
-      <div class="table-container">
-        <table border="1" id="applications-table">
-          <thead>
-            <tr>
-              <th>Target Event</th>
-              <th>Player Full Name</th>
-              <th>Age</th>
-              <th>Email Address</th>
-              <th>Discord Username</th>
-              <th>WhatsApp / Phone</th>
-              <th>Working Mic?</th>
-              <th>Game Match</th>
-              <th>IGN (In-Game Name)</th>
-              <th>Character UID</th>
-              <th>Current Rank</th>
-              <th>Gaming Device</th>
-              <th>Team Status</th>
-              <th>Team / Clan Name</th>
-              <th>Why Select You? (Pitch)</th>
-              <th>Creator Link</th>
-              <th>Secondary Game Interests</th>
-              <th>Referral Source</th>
-              <th>Google Drive Video Upload (Expected Filename & Folder Link)</th>
-              <th>Submitted At</th>
-              <th>Payment Status</th>
-              <th>Payment ID / Info</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colspan="24">Loading application database...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+    </header>
 
-    <hr>
+    <div class="content-body">
+      <!-- Active submissions list -->
+      <section id="applications-list-section">
+        <h2>Active Tournament Submissions</h2>
+        <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem;">Confirm user identities, player profiles, and inspect their Google Drive video uploads.</p>
+        
+        <!-- Tournament Filter Dropdown -->
+        <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+          <div>
+            <label for="event-filter" style="font-weight: bold; margin-right: 0.5rem;">Filter by Tournament:</label>
+            <select id="event-filter" style="padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; min-width: 250px; background:#f8fafc;">
+              <option value="all">All Tournaments</option>
+            </select>
+          </div>
+          <div style="font-size: 0.9rem; color: #64748b;">
+            Showing <span id="filtered-count" style="font-weight: bold; color: #4f46e5;">0</span> applications.
+          </div>
+        </div>
+        
+        <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 0.5rem 0; text-align: right; font-style: italic;">↔️ Scroll table horizontally to view remaining columns (Payment Status, Invoice, Actions, etc.)</p>
+        <div class="table-container">
+          <table border="1" id="applications-table">
+            <thead>
+              <tr>
+                <th>Target Event</th>
+                <th>Player Full Name</th>
+                <th>Age</th>
+                <th>Email Address</th>
+                <th>Discord Username</th>
+                <th>WhatsApp / Phone</th>
+                <th>Working Mic?</th>
+                <th>Game Match</th>
+                <th>IGN (In-Game Name)</th>
+                <th>Character UID</th>
+                <th>Current Rank</th>
+                <th>Gaming Device</th>
+                <th>Team Status</th>
+                <th>Team / Clan Name</th>
+                <th>Why Select You? (Pitch)</th>
+                <th>Creator Link</th>
+                <th>Secondary Game Interests</th>
+                <th>Referral Source</th>
+                <th>Google Drive Video Upload (Expected Filename & Folder Link)</th>
+                <th>Submitted At</th>
+                <th>Payment Status</th>
+                <th>Payment ID / Info</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="24">Loading application database...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   </main>
-
-  <footer>
-    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
-  </footer>
+</div>
 
   <script>
     const logoutBtn = document.getElementById('admin-logout-btn');

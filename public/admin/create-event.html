@@ -7,128 +7,142 @@
   <link rel="stylesheet" href="/admin.css">
   <script src="/nav.js" defer></script>
 </head>
-<body>
-
-  <header>
-    <h1>Beast Arena Gaming Network - Control Panel</h1>
-    <p><strong>Tournament Event Creator</strong></p>
-    
-    <nav>
+<div class="admin-container">
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="/beastarena.png" alt="Beast Arena" class="logo-svg">
+      <div class="logo-text">
+        <h1>Beast Arena</h1>
+        <p>Control Panel</p>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
       <ul>
-        <li><a href="/admin">Dashboard Home</a></li>
-        <li><a href="/admin/create-event">Create Tournament</a></li>
+        <li><a href="/admin">🏠 Dashboard Home</a></li>
+        <li><a href="/admin/create-event" class="active">➕ Create Tournament</a></li>
         <li><a href="/admin/events">Current Tournaments</a></li>
         <li><a href="/admin/advertisements">Manage Ads</a></li>
         <li><a href="/admin/users">View User Accounts</a></li>
         <li><a href="/admin/applications">View Player Applications</a></li>
-        <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
       </ul>
     </nav>
-  </header>
+    <div class="sidebar-footer">
+      <button id="admin-logout-btn" class="logout-btn">🚪 Sign Out</button>
+    </div>
+  </aside>
 
-  <main>
-    <hr>
+  <!-- Right Content Area -->
+  <main class="content-area">
+    <header class="content-header">
+      <h2>Create Tournament Event</h2>
+      <div class="header-status">
+        <span class="status-indicator"></span> Live Session
+      </div>
+    </header>
 
-    <!-- Create Event Form -->
-    <section id="create-event-section">
-      <h2>Create a New Tournament Event</h2>
-      
-      <form id="create-event-form">
-        <fieldset>
-          <legend>Event Setup Details</legend>
-          
-          <p>
-            <label for="event-title">Tournament Title:</label><br>
-            <input type="text" id="event-title" required placeholder="Minecraft: 100 Players Island Survival">
-          </p>
-
-          <p>
-            <label for="event-game">Game Title:</label><br>
-            <input type="text" id="event-game" required placeholder="Minecraft">
-          </p>
-
-          <p>
-            <label for="event-prize">Prize Pool Amount (INR ₹):</label><br>
-            <input type="number" id="event-prize" required placeholder="4000">
-          </p>
-
-          <p>
-            <label for="event-max-players">Max Players Limit:</label><br>
-            <input type="number" id="event-max-players" required placeholder="100">
-          </p>
-
-          <p>
-            <label for="event-drive">Google Drive Submissions Folder URL (Unique Upload Feature):</label><br>
-            <input type="url" id="event-drive" required placeholder="https://drive.google.com/drive/folders/your-folder-id">
-            <br><small>Players will be instructed to name files as InGameID_FullName.mp4 and upload them directly to this folder.</small>
-          </p>
-
-          <p>
-            <label for="event-closes-at">Registration Closing Date & Time (Optional):</label><br>
-            <input type="datetime-local" id="event-closes-at">
-          </p>
-
-          <p>
-            <label for="event-is-paid">Require Entry Fee / Online Payment:</label>
-            <input type="checkbox" id="event-is-paid" style="margin-left: 0.5rem; width: auto; vertical-align: middle;">
-          </p>
-
-          <p id="entry-fee-container" style="display: none;">
-            <label for="event-entry-fee">Entry Fee Amount (INR ₹):</label><br>
-            <input type="number" id="event-entry-fee" placeholder="0" min="0">
-          </p>
-
-          <p>
-            <label for="event-status">Registration Status:</label><br>
-            <select id="event-status" required>
-              <option value="Open">Open</option>
-              <option value="Closed">Closed</option>
-            </select>
-          </p>
-
-          <p>
-            <label for="event-rules">Rules / Event Description:</label><br>
-            <textarea id="event-rules" rows="4" cols="50" placeholder="Survival mode. Last player standing wins. Teaming is allowed..."></textarea>
-          </p>
-
-          <!-- Customizable Registration Form Fields -->
+    <div class="content-body">
+      <!-- Create Event Form -->
+      <section id="create-event-section" class="premium-form">
+        <h2>Configure a New Esports Event</h2>
+        <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem;">Input tournament setup configurations and customize registration form options below.</p>
+        
+        <form id="create-event-form">
           <fieldset>
-            <legend>Required Player Registration Fields (Custom Form Setup)</legend>
-            <p>Select which fields will be displayed and validated on the player registration form for this specific tournament:</p>
-            <label><input type="checkbox" name="registrationFields" value="fullName" checked> Full Name (Text)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="age" checked> Age (Number)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="email" checked> Email Address (Email)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="discordUsername" checked> Discord Username (Text)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="phone" checked> WhatsApp / Mobile Number (Number)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="hasWorkingMic" checked> Working Microphone? (Yes / No Radio)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="game" checked> Select Game (Dropdown)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="ign" checked> In-Game Name (IGN) (Text)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="uid" checked> In-Game Character ID / UID (Text)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="rank" checked> Current Rank / Level (Dropdown)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="device" checked> Gaming Device (Dropdown)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="whySelect" checked> Why should we select you? (Paragraph)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="creatorLink" checked> Content Creator Link? (URL / Optional)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="teamStatus" checked> Team Status (Solo / Squad Dropdown)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="teamName" checked> Team/Clan Name (Text / Optional)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="secondaryGames" checked> Secondary Game Interest (Checkboxes)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="referral" checked> How did you find us? (Dropdown)</label><br>
-            <label><input type="checkbox" name="registrationFields" value="agreedToTerms" checked> Terms & Conditions Agreement (Checkbox)</label>
+            <legend>Event Setup Details</legend>
+            
+            <p>
+              <label for="event-title" style="font-weight: 600;">Tournament Title:</label><br>
+              <input type="text" id="event-title" required placeholder="Minecraft: 100 Players Island Survival" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+            </p>
+
+            <p>
+              <label for="event-game" style="font-weight: 600;">Game Title:</label><br>
+              <input type="text" id="event-game" required placeholder="Minecraft" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+            </p>
+
+            <p>
+              <label for="event-prize" style="font-weight: 600;">Prize Pool Amount (INR ₹):</label><br>
+              <input type="number" id="event-prize" required placeholder="4000" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+            </p>
+
+            <p>
+              <label for="event-max-players" style="font-weight: 600;">Max Players Limit:</label><br>
+              <input type="number" id="event-max-players" required placeholder="100" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+            </p>
+
+            <p>
+              <label for="event-drive" style="font-weight: 600;">Google Drive Submissions Folder URL (Unique Upload Feature):</label><br>
+              <input type="url" id="event-drive" required placeholder="https://drive.google.com/drive/folders/your-folder-id" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              <small style="color: #64748b; font-size: 0.8rem; display:block; margin-top:0.25rem;">Players will be instructed to name files as InGameID_FullName.mp4 and upload them directly to this folder.</small>
+            </p>
+
+            <p>
+              <label for="event-closes-at" style="font-weight: 600;">Registration Closing Date & Time (Optional):</label><br>
+              <input type="datetime-local" id="event-closes-at" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+            </p>
+
+            <p>
+              <label for="event-is-paid" style="font-weight: 600; display: inline-flex; align-items: center; cursor:pointer; user-select:none;">
+                <input type="checkbox" id="event-is-paid" style="margin-right: 0.5rem; width: auto;"> Require Entry Fee / Online Payment
+              </label>
+            </p>
+
+            <p id="entry-fee-container" style="display: none;">
+              <label for="event-entry-fee" style="font-weight: 600;">Entry Fee Amount (INR ₹):</label><br>
+              <input type="number" id="event-entry-fee" placeholder="0" min="0" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+            </p>
+
+            <p>
+              <label for="event-status" style="font-weight: 600;">Registration Status:</label><br>
+              <select id="event-status" required style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+                <option value="Open">Open</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </p>
+
+            <p>
+              <label for="event-rules" style="font-weight: 600;">Rules / Event Description:</label><br>
+              <textarea id="event-rules" rows="4" placeholder="Survival mode. Last player standing wins. Teaming is allowed..." style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem; font-family:inherit;"></textarea>
+            </p>
+
+            <!-- Customizable Registration Form Fields -->
+            <fieldset style="border: 1px solid #e2e8f0; padding: 1.25rem; border-radius: 8px; margin-top: 1.5rem;">
+              <legend style="font-weight: bold; padding: 0 0.5rem; color:#4f46e5;">Required Player Registration Fields (Custom Form Setup)</legend>
+              <p style="font-size: 0.85rem; color:#64748b; margin-top:0;">Select which fields will be displayed and validated on the player registration form for this specific tournament:</p>
+              
+              <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="fullName" checked> Full Name (Text)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="age" checked> Age (Number)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="email" checked> Email Address (Email)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="discordUsername" checked> Discord Username (Text)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="phone" checked> WhatsApp / Mobile Number (Number)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="hasWorkingMic" checked> Working Microphone? (Yes / No Radio)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="game" checked> Select Game (Dropdown)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="ign" checked> In-Game Name (IGN) (Text)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="uid" checked> In-Game Character ID / UID (Text)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="rank" checked> Current Rank / Level (Dropdown)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="device" checked> Gaming Device (Dropdown)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="whySelect" checked> Why should we select you? (Paragraph)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="creatorLink" checked> Content Creator Link? (URL / Optional)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="teamStatus" checked> Team Status (Solo / Squad Dropdown)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="teamName" checked> Team/Clan Name (Text / Optional)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="secondaryGames" checked> Secondary Game Interest (Checkboxes)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="referral" checked> How did you find us? (Dropdown)</label>
+                <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="agreedToTerms" checked> Terms & Conditions Agreement (Checkbox)</label>
+              </div>
+            </fieldset>
+
+            <p style="margin-top: 1.5rem;">
+              <button type="submit" style="background:#4f46e5; color:white; font-weight:bold; padding: 10px 20px; border:none; border-radius:6px; cursor:pointer;">Publish Tournament Event 🚀</button>
+            </p>
           </fieldset>
-
-          <p>
-            <button type="submit">Publish Event</button>
-          </p>
-        </fieldset>
-      </form>
-      <p id="event-form-message"></p>
-    </section>
-
-    <hr>
+        </form>
+        <p id="event-form-message" style="font-weight:bold; margin-top:1rem;"></p>
+      </section>
+    </div>
   </main>
-
-  <footer>
-    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
-  </footer>
+</div>
 
   <script>
     const logoutBtn = document.getElementById('admin-logout-btn');

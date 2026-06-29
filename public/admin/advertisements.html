@@ -7,131 +7,140 @@
   <link rel="stylesheet" href="/admin.css">
   <script src="/nav.js" defer></script>
 </head>
-<body>
-
-  <header>
-    <h1>Beast Arena Gaming Network - Control Panel</h1>
-    <p><strong>Custom Advertisements & Promotion Panel</strong></p>
-    
-    <nav>
+<div class="admin-container">
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="/beastarena.png" alt="Beast Arena" class="logo-svg">
+      <div class="logo-text">
+        <h1>Beast Arena</h1>
+        <p>Control Panel</p>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
       <ul>
-        <li><a href="/admin">Dashboard Home</a></li>
-        <li><a href="/admin/create-event">Create Tournament</a></li>
+        <li><a href="/admin">🏠 Dashboard Home</a></li>
+        <li><a href="/admin/create-event">➕ Create Tournament</a></li>
         <li><a href="/admin/events">Current Tournaments</a></li>
-        <li><a href="/admin/advertisements">Manage Ads</a></li>
+        <li><a href="/admin/advertisements" class="active">📢 Manage Ads</a></li>
         <li><a href="/admin/users">View User Accounts</a></li>
         <li><a href="/admin/applications">View Player Applications</a></li>
-        <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
       </ul>
     </nav>
-  </header>
-
-  <main>
-    <hr>
-
-    <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
-      <!-- Create Ad Section -->
-      <section style="flex: 1; min-width: 320px;">
-        <h2>Create Custom Advertisement</h2>
-        <p>Publish an advertisement banner card to the landing page with custom details and countdown timers.</p>
-        
-        <form id="create-ad-form">
-          <fieldset>
-            <legend>Ad Setup Details</legend>
-            
-            <p>
-              <label for="ad-title">Ad Title:</label><br>
-              <input type="text" id="ad-title" required placeholder="PUBG Mobile Ultimate Showdown">
-            </p>
-
-            <p>
-              <label for="ad-subtitle">Subtitle / Description:</label><br>
-              <textarea id="ad-subtitle" rows="3" style="width:100%;" placeholder="Join India's elite squad tournament, prove your skills..."></textarea>
-            </p>
-
-            <p>
-              <label for="ad-image-select">Background Banner Image:</label><br>
-              <select id="ad-image-select">
-                <option value="/pubg_banner.png">PUBG Banner (Golden Helmet Visual)</option>
-                <option value="/bgmi.png">BGMI Art</option>
-                <option value="/valorant.png">Valorant Art</option>
-                <option value="/minecraft.png">Minecraft Art</option>
-                <option value="/apex_legend.png">Apex Legends Art</option>
-                <option value="/gta_5.png">GTA 5 Art</option>
-                <option value="/fifa_26.png">FIFA 26 Art</option>
-                <option value="custom">-- Custom Image URL --</option>
-              </select>
-            </p>
-
-            <p id="custom-image-container" style="display: none;">
-              <label for="ad-image-custom">Custom Image URL:</label><br>
-              <input type="url" id="ad-image-custom" placeholder="https://example.com/banner.jpg">
-            </p>
-
-            <p>
-              <label for="ad-link-select">Link Button to Active Event (Optional):</label><br>
-              <select id="ad-link-select">
-                <option value="">-- Custom Link URL --</option>
-              </select>
-              <small>If selected, the button URL is automatically linked to pre-select that tournament on registration.</small>
-            </p>
-
-            <p id="custom-url-container">
-              <label for="ad-button-url">Button Redirect URL:</label><br>
-              <input type="text" id="ad-button-url" placeholder="/register" value="/register">
-            </p>
-
-            <p>
-              <label for="ad-button-text">Button Text Label:</label><br>
-              <input type="text" id="ad-button-text" placeholder="Register & Pay Entry Fee 🏆" value="Register & Pay Entry Fee 🏆">
-            </p>
-
-            <p>
-              <label for="ad-prize">Prize Pool Display (e.g. ₹1,00,000 INR):</label><br>
-              <input type="text" id="ad-prize" placeholder="₹1,00,000 INR">
-            </p>
-
-            <p>
-              <label for="ad-date">Event Date Display (e.g. August 11, 2026):</label><br>
-              <input type="text" id="ad-date" placeholder="August 11, 2026">
-            </p>
-
-            <p>
-              <label for="ad-fee">Entry Fee Display (e.g. ₹150):</label><br>
-              <input type="text" id="ad-fee" placeholder="₹150 (Paid)">
-            </p>
-
-            <p>
-              <label for="ad-closes-at">Ad Countdown Closing Date & Time (Optional):</label><br>
-              <input type="datetime-local" id="ad-closes-at">
-              <br><small>Ticking countdown timer displays on homepage card until this target datetime.</small>
-            </p>
-
-            <p>
-              <button type="submit" style="background:#4f46e5; color:white; padding:10px 20px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Publish Advertisement</button>
-            </p>
-          </fieldset>
-        </form>
-        <p id="ad-form-message" style="font-weight:bold;"></p>
-      </section>
-
-      <!-- Manage Ads Section -->
-      <section style="flex: 1.2; min-width: 320px;">
-        <h2>Active Advertisements</h2>
-        <p>Audit and toggle published advertisements showing on the homepage.</p>
-        
-        <div id="ads-list-container" style="display:flex; flex-direction:column; gap:1rem;">
-          <p>Loading advertisements database...</p>
-        </div>
-      </section>
+    <div class="sidebar-footer">
+      <button id="admin-logout-btn" class="logout-btn">🚪 Sign Out</button>
     </div>
+  </aside>
 
-    <hr>
+  <!-- Right Content Area -->
+  <main class="content-area">
+    <header class="content-header">
+      <h2>Custom Advertisements & Promotion Panel</h2>
+      <div class="header-status">
+        <span class="status-indicator"></span> Live Session
+      </div>
+    </header>
+
+    <div class="content-body">
+      <div style="display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start;">
+        <!-- Create Ad Section -->
+        <section style="flex: 1; min-width: 320px;" class="premium-form">
+          <h2>Create Custom Advertisement</h2>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem;">Publish an advertisement banner card to the landing page with custom details and countdown timers.</p>
+          
+          <form id="create-ad-form">
+            <fieldset>
+              <legend>Ad Setup Details</legend>
+              
+              <p>
+                <label for="ad-title" style="font-weight: 600;">Ad Title:</label><br>
+                <input type="text" id="ad-title" required placeholder="PUBG Mobile Ultimate Showdown" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              </p>
+
+              <p>
+                <label for="ad-subtitle" style="font-weight: 600;">Subtitle / Description:</label><br>
+                <textarea id="ad-subtitle" rows="3" style="width:100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem; font-family:inherit;" placeholder="Join India's elite squad tournament, prove your skills..."></textarea>
+              </p>
+
+              <p>
+                <label for="ad-image-select" style="font-weight: 600;">Background Banner Image:</label><br>
+                <select id="ad-image-select" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+                  <option value="/pubg_banner.png">PUBG Banner (Golden Helmet Visual)</option>
+                  <option value="/bgmi.png">BGMI Art</option>
+                  <option value="/valorant.png">Valorant Art</option>
+                  <option value="/minecraft.png">Minecraft Art</option>
+                  <option value="/apex_legend.png">Apex Legends Art</option>
+                  <option value="/gta_5.png">GTA 5 Art</option>
+                  <option value="/fifa_26.png">FIFA 26 Art</option>
+                  <option value="custom">-- Custom Image URL --</option>
+                </select>
+              </p>
+
+              <p id="custom-image-container" style="display: none;">
+                <label for="ad-image-custom" style="font-weight: 600;">Custom Image URL:</label><br>
+                <input type="url" id="ad-image-custom" placeholder="https://example.com/banner.jpg" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              </p>
+
+              <p>
+                <label for="ad-link-select" style="font-weight: 600;">Link Button to Active Event (Optional):</label><br>
+                <select id="ad-link-select" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+                  <option value="">-- Custom Link URL --</option>
+                </select>
+                <small style="color: #64748b; font-size: 0.8rem; display:block; margin-top:0.25rem;">If selected, the button URL is automatically linked to pre-select that tournament on registration.</small>
+              </p>
+
+              <p id="custom-url-container">
+                <label for="ad-button-url" style="font-weight: 600;">Button Redirect URL:</label><br>
+                <input type="text" id="ad-button-url" placeholder="/register" value="/register" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              </p>
+
+              <p>
+                <label for="ad-button-text" style="font-weight: 600;">Button Text Label:</label><br>
+                <input type="text" id="ad-button-text" placeholder="Register & Pay Entry Fee 🏆" value="Register & Pay Entry Fee 🏆" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              </p>
+
+              <p>
+                <label for="ad-prize" style="font-weight: 600;">Prize Pool Display (e.g. ₹1,00,000 INR):</label><br>
+                <input type="text" id="ad-prize" placeholder="₹1,00,000 INR" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              </p>
+
+              <p>
+                <label for="ad-date" style="font-weight: 600;">Event Date Display (e.g. August 11, 2026):</label><br>
+                <input type="text" id="ad-date" placeholder="August 11, 2026" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              </p>
+
+              <p>
+                <label for="ad-fee" style="font-weight: 600;">Entry Fee Display (e.g. ₹150):</label><br>
+                <input type="text" id="ad-fee" placeholder="₹150 (Paid)" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              </p>
+
+              <p>
+                <label for="ad-closes-at" style="font-weight: 600;">Ad Countdown Closing Date & Time (Optional):</label><br>
+                <input type="datetime-local" id="ad-closes-at" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+                <small style="color: #64748b; font-size: 0.8rem; display:block; margin-top:0.25rem;">Ticking countdown timer displays on homepage card until this target datetime.</small>
+              </p>
+
+              <p>
+                <button type="submit" style="background:#4f46e5; color:white; padding:10px 20px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Publish Advertisement</button>
+              </p>
+            </fieldset>
+          </form>
+          <p id="ad-form-message" style="font-weight:bold; margin-top:1rem;"></p>
+        </section>
+
+        <!-- Manage Ads Section -->
+        <section style="flex: 1.2; min-width: 320px;">
+          <h2>Active Advertisements</h2>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem;">Audit and toggle published advertisements showing on the homepage.</p>
+          
+          <div id="ads-list-container" style="display:flex; flex-direction:column; gap:1rem;">
+            <p>Loading advertisements database...</p>
+          </div>
+        </section>
+      </div>
+    </div>
   </main>
-
-  <footer>
-    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
-  </footer>
+</div>
 
   <script>
     const logoutBtn = document.getElementById('admin-logout-btn');

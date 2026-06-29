@@ -7,64 +7,73 @@
   <link rel="stylesheet" href="/admin.css">
   <script src="/nav.js" defer></script>
 </head>
-<body>
-
-  <header>
-    <h1>Beast Arena Gaming Network - Control Panel</h1>
-    <p><strong>Tournament Event Management Ledger</strong></p>
-    
-    <nav>
+<div class="admin-container">
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="/beastarena.png" alt="Beast Arena" class="logo-svg">
+      <div class="logo-text">
+        <h1>Beast Arena</h1>
+        <p>Control Panel</p>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
       <ul>
-        <li><a href="/admin">Dashboard Home</a></li>
-        <li><a href="/admin/create-event">Create Tournament</a></li>
-        <li><a href="/admin/events">Current Tournaments</a></li>
+        <li><a href="/admin">🏠 Dashboard Home</a></li>
+        <li><a href="/admin/create-event">➕ Create Tournament</a></li>
+        <li><a href="/admin/events" class="active">🎮 Current Tournaments</a></li>
         <li><a href="/admin/advertisements">Manage Ads</a></li>
         <li><a href="/admin/users">View User Accounts</a></li>
         <li><a href="/admin/applications">View Player Applications</a></li>
-        <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
       </ul>
     </nav>
-  </header>
+    <div class="sidebar-footer">
+      <button id="admin-logout-btn" class="logout-btn">🚪 Sign Out</button>
+    </div>
+  </aside>
 
-  <main>
-    <hr>
-
-    <!-- Existing Events Table -->
-    <section id="events-list-section">
-      <h2>Current Tournaments</h2>
-      <p>Inspection database of all created esports events on the network.</p>
-      
-      <div class="table-container">
-        <table border="1" id="events-table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Game</th>
-              <th>Prize Pool</th>
-              <th>Entry Fee</th>
-              <th>Max Players</th>
-              <th>Google Drive Folder</th>
-              <th>Status</th>
-              <th>Closing Deadline</th>
-              <th>Created At</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colspan="10">Loading events database...</td>
-            </tr>
-          </tbody>
-        </table>
+  <!-- Right Content Area -->
+  <main class="content-area">
+    <header class="content-header">
+      <h2>Tournament Event Management Ledger</h2>
+      <div class="header-status">
+        <span class="status-indicator"></span> Live Session
       </div>
-    </section>
+    </header>
 
-    <hr>
+    <div class="content-body">
+      <!-- Existing Events Table -->
+      <section id="events-list-section">
+        <h2>Current Tournaments</h2>
+        <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem;">Inspection database of all created esports events on the network.</p>
+        
+        <div class="table-container">
+          <table border="1" id="events-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Game</th>
+                <th>Prize Pool</th>
+                <th>Entry Fee</th>
+                <th>Max Players</th>
+                <th>Google Drive Folder</th>
+                <th>Status</th>
+                <th>Closing Deadline</th>
+                <th>Created At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="10">Loading events database...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   </main>
-
-  <footer>
-    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
-  </footer>
+</div>
 
   <script>
     const logoutBtn = document.getElementById('admin-logout-btn');

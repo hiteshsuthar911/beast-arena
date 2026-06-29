@@ -87,89 +87,124 @@
   </div>
 
   <!-- 2. Admin Secure Dashboard Page -->
-  <div id="admin-dashboard-wrapper" hidden>
-    <header>
-      <h1>Beast Arena Gaming Network - Control Panel</h1>
-      <p><strong>Administrator Oversight & System Operations</strong></p>
-      
-      <!-- Admin Navigation Links (Only shown when authenticated) -->
-      <nav id="admin-nav">
+  <div id="admin-dashboard-wrapper" class="admin-container" hidden>
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <img src="/beastarena.png" alt="Beast Arena" class="logo-svg">
+        <div class="logo-text">
+          <h1>Beast Arena</h1>
+          <p>Control Panel</p>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
         <ul>
-          <li><a href="/admin">Dashboard Home</a></li>
-          <li><a href="/admin/create-event">Create Tournament</a></li>
+          <li><a href="/admin" class="active">🏠 Dashboard Home</a></li>
+          <li><a href="/admin/create-event">➕ Create Tournament</a></li>
           <li><a href="/admin/events">Current Tournaments</a></li>
           <li><a href="/admin/advertisements">Manage Ads</a></li>
           <li><a href="/admin/users">View User Accounts</a></li>
           <li><a href="/admin/applications">View Player Applications</a></li>
-          <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
         </ul>
       </nav>
-    </header>
+      <div class="sidebar-footer">
+        <button id="admin-logout-btn" class="logout-btn">🚪 Sign Out</button>
+      </div>
+    </aside>
 
-    <main>
-      <hr>
+    <!-- Right Content Area -->
+    <main class="content-area">
+      <header class="content-header">
+        <h2>Dashboard Overview</h2>
+        <div class="header-status">
+          <span class="status-indicator"></span> Live Session
+        </div>
+      </header>
 
-      <section id="admin-dashboard-section">
-        <h2>System Diagnostics & Statistics</h2>
-        <p>Welcome, Administrator. Select an option from the navigation bar above or review the system counters below.</p>
+      <div class="content-body">
+        <!-- System Diagnostics & Statistics -->
+        <section id="admin-dashboard-section">
+          <h2>System Diagnostics & Statistics</h2>
+          <p style="color:#64748b; margin-bottom: 1.5rem;">Welcome, Administrator. Review the live system database counters and statuses below.</p>
 
-        <fieldset style="margin-bottom: 1.5rem;">
-          <legend>Database & Platform Status</legend>
-          <ul>
-            <li><strong>Database Status:</strong> <span id="status-db">Checking...</span></li>
-            <li><strong>Total Registered Users:</strong> <span id="status-users">Checking...</span></li>
-            <li><strong>Total Tournament Applications:</strong> <span id="status-apps">Checking...</span></li>
-            <li><strong>Total Created Tournaments:</strong> <span id="status-events">Checking...</span></li>
-          </ul>
-          <p><button id="refresh-status-btn" type="button">Refresh Diagnostics</button></p>
-        </fieldset>
+          <!-- Metrics grid -->
+          <div class="dashboard-grid">
+            <!-- DB Card -->
+            <div class="metric-card">
+              <div class="metric-icon">🗄️</div>
+              <div class="metric-details">
+                <h3>Database Status</h3>
+                <p id="status-db">Checking...</p>
+              </div>
+            </div>
+            <!-- Users Card -->
+            <div class="metric-card">
+              <div class="metric-icon">👤</div>
+              <div class="metric-details">
+                <h3>Registered Users</h3>
+                <p id="status-users">Checking...</p>
+              </div>
+            </div>
+            <!-- Submissions Card -->
+            <div class="metric-card">
+              <div class="metric-icon">📋</div>
+              <div class="metric-details">
+                <h3>Applications</h3>
+                <p id="status-apps">Checking...</p>
+              </div>
+            </div>
+            <!-- Tournaments Card -->
+            <div class="metric-card">
+              <div class="metric-icon">🏆</div>
+              <div class="metric-details">
+                <h3>Tournaments</h3>
+                <p id="status-events">Checking...</p>
+              </div>
+            </div>
+          </div>
+          <p><button id="refresh-status-btn" type="button" style="background:#4f46e5; color:white; border:none; padding:8px 16px; border-radius:6px; font-weight:bold; cursor:pointer;">Refresh Diagnostics 🔄</button></p>
+        </section>
 
         <!-- Razorpay Configuration Panel -->
-        <fieldset style="margin-bottom: 1.5rem; border-color: #4f46e5;">
-          <legend style="color: #4f46e5; font-weight: bold;">Razorpay Payment Gateway Settings</legend>
-          <p style="font-size: 0.9rem; color: #4b5563; margin-top: 0;">Configure the API credentials used for online player event registration entry fees.</p>
+        <section class="premium-form">
+          <h2>Razorpay Payment Gateway Settings</h2>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem;">Configure the API credentials used for online player event registration entry fees.</p>
           <form id="payment-config-form">
-            <div class="form-group" style="margin-bottom: 1rem;">
-              <label for="razorpay-key-id" style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Razorpay Key ID:</label>
-              <input type="text" id="razorpay-key-id" placeholder="rzp_test_..." style="width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc;">
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="razorpay-key-id" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Razorpay Key ID:</label>
+              <input type="text" id="razorpay-key-id" placeholder="rzp_test_..." style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc;">
             </div>
             
-            <div class="form-group" style="margin-bottom: 1rem;">
-              <label for="razorpay-key-secret" style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Razorpay Secret Key:</label>
-              <input type="password" id="razorpay-key-secret" placeholder="Secret Key (hidden)" style="width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc;">
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="razorpay-key-secret" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Razorpay Secret Key:</label>
+              <input type="password" id="razorpay-key-secret" placeholder="Secret Key (hidden)" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc;">
             </div>
 
-            <div class="form-group" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <div class="form-group" style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
               <input type="checkbox" id="razorpay-enabled" style="width: auto;" checked>
               <label for="razorpay-enabled" style="font-weight: 600; user-select: none; cursor: pointer;">Enable Online Payments</label>
             </div>
 
-            <button type="submit" style="background-color: #4f46e5; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+            <button type="submit" style="background-color: #4f46e5; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
               Save Gateway Configuration
             </button>
           </form>
-          <p id="payment-config-msg" style="font-weight: bold; margin-top: 0.5rem; font-size: 0.9rem;"></p>
-        </fieldset>
+          <p id="payment-config-msg" style="font-weight: bold; margin-top: 1rem; font-size: 0.9rem;"></p>
+        </section>
 
         <!-- System Maintenance Panel -->
-        <fieldset style="border-color: #dc2626; margin-bottom: 1.5rem;">
-          <legend style="color: #dc2626; font-weight: bold;">System Maintenance & Danger Zone</legend>
-          <p style="font-size: 0.9rem; color: #4b5563; margin-top: 0;">Resetting all details will permanently delete all player user accounts, tournament application records, and created events from the platform database.</p>
+        <section style="border-top: 4px solid #dc2626;">
+          <h2 style="color: #dc2626;">System Maintenance & Danger Zone ⚠️</h2>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem;">Resetting all details will permanently delete all player user accounts, tournament application records, and created events from the platform database.</p>
           <p>
-            <button id="reset-db-btn" type="button" style="background-color: #dc2626; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem;">
-              Reset All Details & Clear Database ⚠️
+            <button id="reset-db-btn" type="button" style="background-color: #dc2626; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem;">
+              Reset All Details & Clear Database ⚡
             </button>
           </p>
-          <p id="reset-status-msg" style="font-weight: bold; margin-top: 0.5rem;"></p>
-        </fieldset>
-      </section>
-
-      <hr>
+          <p id="reset-status-msg" style="font-weight: bold; margin-top: 1rem;"></p>
+        </section>
+      </div>
     </main>
-
-    <footer>
-      <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
-    </footer>
   </div>
 
   <script>

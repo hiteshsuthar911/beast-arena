@@ -7,55 +7,65 @@
   <link rel="stylesheet" href="/admin.css">
   <script src="/nav.js" defer></script>
 </head>
-<body>
-
-  <header>
-    <h1>Beast Arena Gaming Network - Control Panel</h1>
-    <p><strong>Registered User Accounts Database</strong></p>
-    
-    <nav>
+<div class="admin-container">
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="/beastarena.png" alt="Beast Arena" class="logo-svg">
+      <div class="logo-text">
+        <h1>Beast Arena</h1>
+        <p>Control Panel</p>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
       <ul>
-        <li><a href="/admin">Dashboard Home</a></li>
-        <li><a href="/admin/create-event">Create Tournament</a></li>
+        <li><a href="/admin">🏠 Dashboard Home</a></li>
+        <li><a href="/admin/create-event">➕ Create Tournament</a></li>
         <li><a href="/admin/events">Current Tournaments</a></li>
         <li><a href="/admin/advertisements">Manage Ads</a></li>
-        <li><a href="/admin/users">View User Accounts</a></li>
+        <li><a href="/admin/users" class="active">👤 View User Accounts</a></li>
         <li><a href="/admin/applications">View Player Applications</a></li>
-        <li><button id="admin-logout-btn" type="button">Sign Out</button></li>
       </ul>
     </nav>
-  </header>
+    <div class="sidebar-footer">
+      <button id="admin-logout-btn" class="logout-btn">🚪 Sign Out</button>
+    </div>
+  </aside>
 
-  <main>
-    <hr>
-
-    <section id="users-list-section">
-      <h2>Registered Player Accounts</h2>
-      <p>Users who completed authentication via email/password.</p>
-      
-      <div class="table-container">
-        <table border="1" id="users-table">
-          <thead>
-            <tr>
-              <th>Email Address</th>
-              <th>Registered At</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colspan="2">Loading users database...</td>
-            </tr>
-          </tbody>
-        </table>
+  <!-- Right Content Area -->
+  <main class="content-area">
+    <header class="content-header">
+      <h2>Registered User Accounts Database</h2>
+      <div class="header-status">
+        <span class="status-indicator"></span> Live Session
       </div>
-    </section>
+    </header>
 
-    <hr>
+    <div class="content-body">
+      <!-- Users list section -->
+      <section id="users-list-section">
+        <h2>Registered Player Accounts</h2>
+        <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem;">Users who completed authentication via email/password.</p>
+        
+        <div class="table-container">
+          <table border="1" id="users-table">
+            <thead>
+              <tr>
+                <th>Email Address</th>
+                <th>Registered At</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="2">Loading users database...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   </main>
-
-  <footer>
-    <p>&copy; 2026 Beast Arena Gaming Network. All rights reserved. | <a href="/admin">Admin Panel</a></p>
-  </footer>
+</div>
 
   <script>
     const logoutBtn = document.getElementById('admin-logout-btn');
