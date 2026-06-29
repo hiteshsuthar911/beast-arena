@@ -53,33 +53,33 @@
             
             <p>
               <label for="event-title" style="font-weight: 600;">Tournament Title:</label><br>
-              <input type="text" id="event-title" required placeholder="Minecraft: 100 Players Island Survival" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              <input type="text" id="event-title" required placeholder="Minecraft: 100 Players Island Survival" style="width: 100%; margin-top: 0.25rem;">
             </p>
 
             <p>
               <label for="event-game" style="font-weight: 600;">Game Title:</label><br>
-              <input type="text" id="event-game" required placeholder="Minecraft" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              <input type="text" id="event-game" required placeholder="Minecraft" style="width: 100%; margin-top: 0.25rem;">
             </p>
 
             <p>
               <label for="event-prize" style="font-weight: 600;">Prize Pool Amount (INR ₹):</label><br>
-              <input type="number" id="event-prize" required placeholder="4000" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              <input type="number" id="event-prize" required placeholder="4000" style="width: 100%; margin-top: 0.25rem;">
             </p>
 
             <p>
               <label for="event-max-players" style="font-weight: 600;">Max Players Limit:</label><br>
-              <input type="number" id="event-max-players" required placeholder="100" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              <input type="number" id="event-max-players" required placeholder="100" style="width: 100%; margin-top: 0.25rem;">
             </p>
 
             <p>
               <label for="event-drive" style="font-weight: 600;">Google Drive Submissions Folder URL (Unique Upload Feature):</label><br>
-              <input type="url" id="event-drive" required placeholder="https://drive.google.com/drive/folders/your-folder-id" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
-              <small style="color: #64748b; font-size: 0.8rem; display:block; margin-top:0.25rem;">Players will be instructed to name files as InGameID_FullName.mp4 and upload them directly to this folder.</small>
+              <input type="url" id="event-drive" required placeholder="https://drive.google.com/drive/folders/your-folder-id" style="width: 100%; margin-top: 0.25rem;">
+              <small>Players will be instructed to name files as InGameID_FullName.mp4 and upload them directly to this folder.</small>
             </p>
 
             <p>
               <label for="event-closes-at" style="font-weight: 600;">Registration Closing Date & Time (Optional):</label><br>
-              <input type="datetime-local" id="event-closes-at" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              <input type="datetime-local" id="event-closes-at" style="width: 100%; margin-top: 0.25rem;">
             </p>
 
             <p>
@@ -90,12 +90,12 @@
 
             <p id="entry-fee-container" style="display: none;">
               <label for="event-entry-fee" style="font-weight: 600;">Entry Fee Amount (INR ₹):</label><br>
-              <input type="number" id="event-entry-fee" placeholder="0" min="0" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              <input type="number" id="event-entry-fee" placeholder="0" min="0" style="width: 100%; margin-top: 0.25rem;">
             </p>
 
             <p>
               <label for="event-status" style="font-weight: 600;">Registration Status:</label><br>
-              <select id="event-status" required style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem;">
+              <select id="event-status" required style="width: 100%; margin-top: 0.25rem;">
                 <option value="Open">Open</option>
                 <option value="Closed">Closed</option>
               </select>
@@ -103,13 +103,13 @@
 
             <p>
               <label for="event-rules" style="font-weight: 600;">Rules / Event Description:</label><br>
-              <textarea id="event-rules" rows="4" placeholder="Survival mode. Last player standing wins. Teaming is allowed..." style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; outline:none; background:#f8fafc; margin-top: 0.25rem; font-family:inherit;"></textarea>
+              <textarea id="event-rules" rows="4" placeholder="Survival mode. Last player standing wins. Teaming is allowed..." style="width: 100%; margin-top: 0.25rem; font-family:inherit;"></textarea>
             </p>
 
             <!-- Customizable Registration Form Fields -->
-            <fieldset style="border: 1px solid #e2e8f0; padding: 1.25rem; border-radius: 8px; margin-top: 1.5rem;">
-              <legend style="font-weight: bold; padding: 0 0.5rem; color:#4f46e5;">Required Player Registration Fields (Custom Form Setup)</legend>
-              <p style="font-size: 0.85rem; color:#64748b; margin-top:0;">Select which fields will be displayed and validated on the player registration form for this specific tournament:</p>
+            <fieldset style="margin-top: 1.5rem;">
+              <legend>Required Player Registration Fields (Custom Form Setup)</legend>
+              <p>Select which fields will be displayed and validated on the player registration form for this specific tournament:</p>
               
               <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
                 <label style="cursor:pointer;"><input type="checkbox" name="registrationFields" value="fullName" checked> Full Name (Text)</label>

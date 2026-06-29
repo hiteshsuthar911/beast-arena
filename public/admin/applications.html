@@ -50,14 +50,14 @@
         <!-- Tournament Filter Dropdown -->
         <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
           <div>
-            <label for="event-filter" style="font-weight: bold; margin-right: 0.5rem;">Filter by Tournament:</label>
-            <select id="event-filter" style="padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; min-width: 250px; background:#f8fafc;">
-              <option value="all">All Tournaments</option>
-            </select>
-          </div>
-          <div style="font-size: 0.9rem; color: #64748b;">
-            Showing <span id="filtered-count" style="font-weight: bold; color: #4f46e5;">0</span> applications.
-          </div>
+          <label for="event-filter" style="font-weight: bold; margin-right: 0.5rem;">Filter by Tournament:</label>
+          <select id="event-filter">
+            <option value="all">All Tournaments</option>
+          </select>
+        </div>
+        <div style="font-size: 0.9rem; color: var(--text-muted);">
+          Showing <span id="filtered-count" style="font-weight: bold; color: var(--accent);">0</span> applications.
+        </div>
         </div>
         
         <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 0.5rem 0; text-align: right; font-style: italic;">↔️ Scroll table horizontally to view remaining columns (Payment Status, Invoice, Actions, etc.)</p>
@@ -339,14 +339,14 @@
           statusBadge.style.fontWeight = 'bold';
           statusBadge.style.fontSize = '0.75rem';
           if (pStatus === 'Paid') {
-            statusBadge.style.background = '#d1fae5';
-            statusBadge.style.color = '#065f46';
+            statusBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+            statusBadge.style.color = '#10b981';
           } else if (pStatus === 'Pending') {
-            statusBadge.style.background = '#fef3c7';
-            statusBadge.style.color = '#92400e';
+            statusBadge.style.background = 'rgba(245, 158, 11, 0.15)';
+            statusBadge.style.color = '#f59e0b';
           } else {
-            statusBadge.style.background = '#f1f5f9';
-            statusBadge.style.color = '#475569';
+            statusBadge.style.background = 'rgba(239, 68, 68, 0.15)';
+            statusBadge.style.color = '#f87171';
           }
           payStatusCell.appendChild(statusBadge);
           row.appendChild(payStatusCell);
@@ -376,13 +376,7 @@
             const invoiceBtn = document.createElement('button');
             invoiceBtn.textContent = 'Invoice 📄';
             invoiceBtn.type = 'button';
-            invoiceBtn.style.padding = '4px 8px';
-            invoiceBtn.style.fontSize = '12px';
-            invoiceBtn.style.cursor = 'pointer';
-            invoiceBtn.style.background = '#e0e7ff';
-            invoiceBtn.style.color = '#4338ca';
-            invoiceBtn.style.border = '1px solid #4338ca';
-            invoiceBtn.style.marginRight = '6px';
+            invoiceBtn.className = 'table-action-btn';
             invoiceBtn.addEventListener('click', () => {
               viewInvoice(app._id);
             });
@@ -393,9 +387,7 @@
             const shortlistBtn = document.createElement('button');
             shortlistBtn.textContent = 'Shortlist 🏆';
             shortlistBtn.type = 'button';
-            shortlistBtn.style.padding = '4px 8px';
-            shortlistBtn.style.fontSize = '12px';
-            shortlistBtn.style.cursor = 'pointer';
+            shortlistBtn.className = 'table-action-btn';
             shortlistBtn.addEventListener('click', async () => {
               if (!confirm(`Are you sure you want to shortlist ${app.fullName || 'this player'}?`)) {
                 return;
@@ -424,7 +416,7 @@
             actionsCell.appendChild(shortlistBtn);
           } else if (app.paymentStatus !== 'Paid') {
             actionsCell.textContent = 'No actions';
-            actionsCell.style.color = '#64748b';
+            actionsCell.style.color = 'var(--text-muted)';
           }
           row.appendChild(actionsCell);
           

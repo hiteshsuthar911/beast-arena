@@ -146,8 +146,22 @@
             row.appendChild(driveCell);
 
             const statusCell = document.createElement('td');
+            const statusBadge = document.createElement('span');
             const isExpired = evt.closesAt && new Date(evt.closesAt) < new Date();
-            statusCell.textContent = evt.status + (isExpired && evt.status === 'Open' ? ' (Expired)' : '');
+            const displayStatus = evt.status + (isExpired && evt.status === 'Open' ? ' (Expired)' : '');
+            statusBadge.textContent = displayStatus;
+            statusBadge.style.padding = '2px 6px';
+            statusBadge.style.borderRadius = '4px';
+            statusBadge.style.fontWeight = 'bold';
+            statusBadge.style.fontSize = '0.75rem';
+            if (evt.status === 'Open' && !isExpired) {
+              statusBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+              statusBadge.style.color = '#10b981';
+            } else {
+              statusBadge.style.background = 'rgba(239, 68, 68, 0.15)';
+              statusBadge.style.color = '#f87171';
+            }
+            statusCell.appendChild(statusBadge);
             row.appendChild(statusCell);
 
             const closesAtCell = document.createElement('td');
@@ -164,10 +178,7 @@
             const viewAppsBtn = document.createElement('button');
             viewAppsBtn.textContent = 'View Submissions 🔍';
             viewAppsBtn.type = 'button';
-            viewAppsBtn.style.padding = '4px 8px';
-            viewAppsBtn.style.fontSize = '12px';
-            viewAppsBtn.style.cursor = 'pointer';
-            viewAppsBtn.style.marginRight = '6px';
+            viewAppsBtn.className = 'table-action-btn';
             viewAppsBtn.addEventListener('click', () => {
               window.location.href = `/admin/applications?eventId=${evt._id}`;
             });
@@ -177,9 +188,7 @@
               const closeBtn = document.createElement('button');
               closeBtn.textContent = 'Close Registration 🛑';
               closeBtn.type = 'button';
-              closeBtn.style.padding = '4px 8px';
-              closeBtn.style.fontSize = '12px';
-              closeBtn.style.cursor = 'pointer';
+              closeBtn.className = 'table-action-btn';
               closeBtn.addEventListener('click', async () => {
                 if (confirm(`Are you sure you want to close registration for "${evt.title}"?`)) {
                   try {
@@ -209,14 +218,7 @@
             const deleteBtn = document.createElement('button');
             deleteBtn.textContent = 'Delete 🗑️';
             deleteBtn.type = 'button';
-            deleteBtn.style.padding = '4px 8px';
-            deleteBtn.style.fontSize = '12px';
-            deleteBtn.style.cursor = 'pointer';
-            deleteBtn.style.background = '#ef4444';
-            deleteBtn.style.color = 'white';
-            deleteBtn.style.border = 'none';
-            deleteBtn.style.borderRadius = '4px';
-            deleteBtn.style.marginLeft = '6px';
+            deleteBtn.className = 'table-action-btn btn-danger';
             deleteBtn.addEventListener('click', async () => {
               if (confirm(`WARNING: Are you sure you want to delete "${evt.title}"?\nThis will permanently delete the event AND ALL registration applications linked to it!`)) {
                 try {
